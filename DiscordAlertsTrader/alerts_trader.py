@@ -11,6 +11,7 @@ import queue
 import re
 import threading
 import time
+import warnings
 from datetime import date, datetime, timedelta
 
 import numpy as np
@@ -22,6 +23,11 @@ from DiscordAlertsTrader.message_parser import (
     ordersymb_to_str,
     parse_exit_plan,
     set_exit_price_type,
+)
+
+# Suppress FutureWarning about DataFrame concatenation with empty DataFrames
+warnings.filterwarnings(
+    "ignore", category=FutureWarning, message=".*behavior of DataFrame concatenation.*"
 )
 
 
@@ -863,7 +869,7 @@ class AlertsTrader:
                     self.portfolio = pd.concat(
                         [
                             self.portfolio,
-                            pd.DataFrame.from_records(new_trade, index=[0]),
+                            pd.DataFrame([new_trade]),
                         ],
                         ignore_index=True,
                     )
@@ -891,7 +897,7 @@ class AlertsTrader:
             if order_response is None:  # Assume trade not accepted
                 log_alert["action"] = action + "-notAccepted"
                 self.alerts_log = pd.concat(
-                    [self.alerts_log, pd.DataFrame.from_records(log_alert, index=[0])],
+                    [self.alerts_log, pd.DataFrame([log_alert])],
                     ignore_index=True,
                 )
                 self.save_logs(["alert"])
@@ -911,7 +917,7 @@ class AlertsTrader:
             if order_status == "REJECTED":
                 log_alert["action"] = "REJECTED"
                 self.alerts_log = pd.concat(
-                    [self.alerts_log, pd.DataFrame.from_records(log_alert, index=[0])],
+                    [self.alerts_log, pd.DataFrame([log_alert])],
                     ignore_index=True,
                 )
                 self.save_logs(["alert"])
@@ -946,7 +952,7 @@ class AlertsTrader:
             }
 
             self.portfolio = pd.concat(
-                [self.portfolio, pd.DataFrame.from_records(new_trade, index=[0])],
+                [self.portfolio, pd.DataFrame([new_trade])],
                 ignore_index=True,
             )
 
@@ -984,7 +990,7 @@ class AlertsTrader:
             log_alert["action"] = action
             log_alert["portfolio_idx"] = len(self.portfolio) - 1
             self.alerts_log = pd.concat(
-                [self.alerts_log, pd.DataFrame.from_records(log_alert, index=[0])],
+                [self.alerts_log, pd.DataFrame([log_alert])],
                 ignore_index=True,
             )
             self.save_logs()
@@ -1003,7 +1009,7 @@ class AlertsTrader:
             if order_response is None:  # Assume trade not accepted
                 log_alert["action"] = "BTO-Avg-notAccepted"
                 self.alerts_log = pd.concat(
-                    [self.alerts_log, pd.DataFrame.from_records(log_alert, index=[0])],
+                    [self.alerts_log, pd.DataFrame([log_alert])],
                     ignore_index=True,
                 )
                 self.save_logs(["alert"])
@@ -1087,7 +1093,7 @@ class AlertsTrader:
             log_alert["action"] = "BTO-avg"
             log_alert["portfolio_idx"] = len(self.portfolio) - 1
             self.alerts_log = pd.concat(
-                [self.alerts_log, pd.DataFrame.from_records(log_alert, index=[0])],
+                [self.alerts_log, pd.DataFrame([log_alert])],
                 ignore_index=True,
             )
             self.save_logs()
@@ -1096,7 +1102,7 @@ class AlertsTrader:
             str_act = f"Repeated {order['action']}"
             log_alert["action"] = f"{order['action']}-Null-Repeated"
             self.alerts_log = pd.concat(
-                [self.alerts_log, pd.DataFrame.from_records(log_alert, index=[0])],
+                [self.alerts_log, pd.DataFrame([log_alert])],
                 ignore_index=True,
             )
             self.save_logs(["alert"])
@@ -1110,7 +1116,7 @@ class AlertsTrader:
                     f"{order['action']}-alerted without open position"
                 )
                 self.alerts_log = pd.concat(
-                    [self.alerts_log, pd.DataFrame.from_records(log_alert, index=[0])],
+                    [self.alerts_log, pd.DataFrame([log_alert])],
                     ignore_index=True,
                 )
                 self.save_logs()
@@ -1140,7 +1146,7 @@ class AlertsTrader:
                         self.alerts_log = pd.concat(
                             [
                                 self.alerts_log,
-                                pd.DataFrame.from_records(log_alert, index=[0]),
+                                pd.DataFrame([log_alert]),
                             ],
                             ignore_index=True,
                         )
@@ -1153,7 +1159,7 @@ class AlertsTrader:
                 str_act = "BTC without STO, maybe alredy bought"
             log_alert["action"] = f"{order['action']}-Null-notOpen"
             self.alerts_log = pd.concat(
-                [self.alerts_log, pd.DataFrame.from_records(log_alert, index=[0])],
+                [self.alerts_log, pd.DataFrame([log_alert])],
                 ignore_index=True,
             )
             self.save_logs(["alert"])
@@ -1202,7 +1208,7 @@ class AlertsTrader:
                                 self.alerts_log = pd.concat(
                                     [
                                         self.alerts_log,
-                                        pd.DataFrame.from_records(log_alert, index=[0]),
+                                        pd.DataFrame([log_alert]),
                                     ],
                                     ignore_index=True,
                                 )
@@ -1230,7 +1236,7 @@ class AlertsTrader:
                     self.alerts_log = pd.concat(
                         [
                             self.alerts_log,
-                            pd.DataFrame.from_records(log_alert, index=[0]),
+                            pd.DataFrame([log_alert]),
                         ],
                         ignore_index=True,
                     )
@@ -1249,7 +1255,7 @@ class AlertsTrader:
                 log_alert["portfolio_idx"] = open_trade
                 self.portfolio.iloc[open_trade, "isOpen"] = 0
                 self.alerts_log = pd.concat(
-                    [self.alerts_log, pd.DataFrame.from_records(log_alert, index=[0])],
+                    [self.alerts_log, pd.DataFrame([log_alert])],
                     ignore_index=True,
                 )
                 self.save_logs(["alert"])
@@ -1307,7 +1313,7 @@ class AlertsTrader:
                 log_alert["action"] = f"{STC}-DoneBefore"
                 log_alert["portfolio_idx"] = open_trade
                 self.alerts_log = pd.concat(
-                    [self.alerts_log, pd.DataFrame.from_records(log_alert, index=[0])],
+                    [self.alerts_log, pd.DataFrame([log_alert])],
                     ignore_index=True,
                 )
                 self.save_logs(["alert"])
@@ -1363,7 +1369,7 @@ class AlertsTrader:
             if order_response is None:  # Assume trade rejected by user
                 log_alert["action"] = f"{order['action']}-notAccepted"
                 self.alerts_log = pd.concat(
-                    [self.alerts_log, pd.DataFrame.from_records(log_alert, index=[0])],
+                    [self.alerts_log, pd.DataFrame([log_alert])],
                     ignore_index=True,
                 )
                 self.save_logs(["alert"])
@@ -1405,7 +1411,7 @@ class AlertsTrader:
             # Log trades_log
             log_alert["action"] = "STC-partial" if order["xQty"] < 1 else "STC-ALL"
             self.alerts_log = pd.concat(
-                [self.alerts_log, pd.DataFrame.from_records(log_alert, index=[0])],
+                [self.alerts_log, pd.DataFrame([log_alert])],
                 ignore_index=True,
             )
             self.save_logs()

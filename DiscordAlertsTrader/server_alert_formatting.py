@@ -1883,23 +1883,15 @@ def bear_alerts(message_):
                     alert = f"ExitUpdate {pos['ticker']} {pos['strike']}{pos['type']} {pos['expiry']} runners (10% remain) (de-risk)"
                 # else: already at runners or closed, leave as-is
 
-        # "adding" patterns - position size increase (same size as original BTO)
+        # "adding" patterns - position size increase (prefer market add; ignore mental stop in alert)
         elif "adding" in alert_lower:
             # Handle follow-up add messages like "adding here mental stop under 501"
             key, pos = _get_most_recent_active_position()
             if key and pos:
-                # Extract optional mental stop level
-                ms_match = re.search(
-                    r"mental stop (?:under|below)\s*(\d+(?:\.\d+)?)",
-                    alert_lower,
-                    re.IGNORECASE,
-                )
-                mental_stop = ms_match.group(1) if ms_match else None
-                # Represent add as market add; price unknown at alert time
-                alert = f"BTO {pos['ticker']} {pos['strike']}{pos['type'].upper()} {pos['expiry']} @ "
-                if mental_stop:
-                    # Append stop level in a parsable way (SL <level>) for downstream logic
-                    alert += f" SL {mental_stop}"
+                # If a mental stop is mentioned, we intentionally do NOT encode it into the
+                # alert string to avoid confusing the price parser. We could persist it to
+                # state in future if needed, but execution-wise this is an add at market.
+                alert = f"BTO {pos['ticker']} {pos['strike']}{pos['type'].upper()} {pos['expiry']} @Mkt add"
         # Leave alert unchanged if no recognizable pattern
 
     message.content = alert

@@ -22,11 +22,12 @@ def parse_trade_alert(msg, asset=None):
     market_flag = False
     if msg and re.search(r"@\s*MKT", msg, re.IGNORECASE):
         market_flag = True
-    pattern = r"\b(BTO|STC|STO|BTC)\b\s*(\d+)?\s*([A-Z]+)\s*(\d+[.\d+]*[cp]?)?\s*(\d{1,2}\/\d{1,2}(?:\/\d{2,4})?)?\s*@\s*[$]*[ ]*(\d+(?:[,.]\d+)?|\.\d+)"
+    # Accept numeric price or the market token 'MKT' (case-insensitive)
+    pattern = r"\b(BTO|STC|STO|BTC)\b\s*(\d+)?\s*([A-Z]+)\s*(\d+[.\d+]*[cp]?)?\s*(\d{1,2}\/\d{1,2}(?:\/\d{2,4})?)?\s*@\s*[$]*[ ]*(\d+(?:[,.]\d+)?|\.\d+|MKT)"
     match = re.search(pattern, msg, re.IGNORECASE)
     strike_date = True
     if match is None:
-        pattern = r"\b(BTO|STC|STO|BTC)\b\s*(\d+)?\s*([A-Z]+)\s*(\d{1,2}\/\d{1,2}(?:\/\d{2,4})?)?\s*(\d+[.\d+]*[CP]?)?\s*@*[$]*[ ]*(\d+(?:[,.]\d+)?|\.\d+)"
+        pattern = r"\b(BTO|STC|STO|BTC)\b\s*(\d+)?\s*([A-Z]+)\s*(\d{1,2}\/\d{1,2}(?:\/\d{2,4})?)?\s*(\d+[.\d+]*[CP]?)?\s*@*[$]*[ ]*(\d+(?:[,.]\d+)?|\.\d+|MKT)"
         match = re.search(pattern, msg, re.IGNORECASE)
         strike_date = False
     if match:
@@ -36,7 +37,7 @@ def parse_trade_alert(msg, asset=None):
             action, quantity, ticker, expDate, strike, price = match.groups()
 
         # If '@MKT' present treat as market order with unknown fill price
-        if market_flag:
+        if market_flag or (isinstance(price, str) and price.upper() == "MKT"):
             price = None
 
         asset_type = "option" if strike and expDate else "stock"
