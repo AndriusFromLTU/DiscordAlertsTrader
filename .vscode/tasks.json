@@ -1,0 +1,189 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Install Dependencies",
+            "type": "shell",
+            "command": "${workspaceFolder}/.venv/bin/pip",
+            "args": [
+                "install",
+                "-r",
+                "requirements.txt"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        },
+        {
+            "label": "Install Dev Dependencies",
+            "type": "shell",
+            "command": "${workspaceFolder}/.venv/bin/pip",
+            "args": [
+                "install",
+                "-e",
+                "."
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        },
+        {
+            "label": "Run DiscordAlertsTrader GUI",
+            "type": "shell",
+            "command": "${workspaceFolder}/.venv/bin/python",
+            "args": [
+                "-m",
+                "DiscordAlertsTrader.gui"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "options": {
+                "env": {
+                    "PYTHONPATH": "${workspaceFolder}",
+                    "QT_MAC_WANTS_LAYER": "1"
+                }
+            }
+        },
+        {
+            "label": "Run Discord Bot",
+            "type": "shell",
+            "command": "${workspaceFolder}/.venv/bin/python",
+            "args": [
+                "DiscordAlertsTrader/discord_bot.py"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "options": {
+                "env": {
+                    "PYTHONPATH": "${workspaceFolder}"
+                }
+            }
+        },
+        {
+            "label": "Run Tests",
+            "type": "shell",
+            "command": "${workspaceFolder}/.venv/bin/pytest",
+            "args": [
+                "tests",
+                "-v",
+                "-s"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "options": {
+                "env": {
+                    "PYTHONPATH": "${workspaceFolder}"
+                }
+            },
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Run Tests with Coverage",
+            "type": "shell",
+            "command": "${workspaceFolder}/.venv/bin/pytest",
+            "args": [
+                "tests",
+                "--cov=DiscordAlertsTrader",
+                "--cov-report=html",
+                "--cov-report=term",
+                "-v"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "options": {
+                "env": {
+                    "PYTHONPATH": "${workspaceFolder}"
+                }
+            }
+        },
+        {
+            "label": "Format Code (Black)",
+            "type": "shell",
+            "command": "${workspaceFolder}/.venv/bin/black",
+            "args": [
+                "DiscordAlertsTrader",
+                "tests"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Lint Code (Pylint)",
+            "type": "shell",
+            "command": "${workspaceFolder}/.venv/bin/pylint",
+            "args": [
+                "DiscordAlertsTrader"
+            ],
+            "problemMatcher": {
+                "owner": "python",
+                "fileLocation": [
+                    "relative",
+                    "${workspaceFolder}"
+                ],
+                "pattern": {
+                    "regexp": "^(.+):(\\d+):(\\d+):\\s+(\\w+):\\s+(.+)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Create Virtual Environment",
+            "type": "shell",
+            "command": "python3",
+            "args": [
+                "-m",
+                "venv",
+                ".venv"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        },
+        {
+            "label": "Setup Project",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Create Virtual Environment",
+                "Install Dependencies",
+                "Install Dev Dependencies"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        }
+    ]
+}

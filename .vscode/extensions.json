@@ -1,0 +1,33 @@
+{
+    "recommendations": [
+        // Python Development
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.black-formatter",
+        "ms-python.pylint",
+        "ms-python.debugpy",
+        // Python Testing
+        "littlefoxteam.vscode-python-test-adapter",
+        // Documentation
+        "njpwerner.autodocstring",
+        "streetsidesoftware.code-spell-checker",
+        // Git
+        "eamodio.gitlens",
+        "github.vscode-pull-request-github",
+        // AI Assistance
+        "github.copilot",
+        // Data Science & Analysis
+        "ms-toolsai.jupyter",
+        "mechatroner.rainbow-csv",
+        // General Development
+        "ms-vscode.makefile-tools",
+        "visualstudioexptteam.vscodeintellicode",
+        "gruntfuggly.todo-tree",
+        // JSON & Config Files
+        "redhat.vscode-yaml",
+        // Container Development
+        "ms-vscode-remote.remote-containers",
+        // Markdown
+        "yzhang.markdown-all-in-one"
+    ]
+}

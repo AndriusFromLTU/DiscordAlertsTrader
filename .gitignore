@@ -15,7 +15,6 @@ tokens.json
 tasty_token.json
 *.DS_Store
 * - Copy.csv
-.vscode/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
