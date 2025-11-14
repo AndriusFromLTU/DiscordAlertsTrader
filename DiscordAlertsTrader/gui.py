@@ -2,53 +2,47 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sat Apr  3 18:18:43 2021
+Migrated to tkinter/ttkbootstrap on Nov 13 2025
 
 @author: adonay
 """
+
 import os
 import os.path as op
-import threading
-import pandas as pd
-from datetime import datetime
-import time
-import re
 import queue
-import PySimpleGUIQt as sg
-# from PySide2.QtWidgets import QHeaderView
-import matplotlib.pyplot as plt
+import re
+import threading
+import time
+import tkinter as tk
+from datetime import datetime
+from tkinter import ttk
 
-from DiscordAlertsTrader.brokerages import get_brokerage
+import matplotlib.pyplot as plt
+import pandas as pd
+import ttkbootstrap as ttk_boot
+from ttkbootstrap.constants import *
+
 from DiscordAlertsTrader import gui_generator as gg
 from DiscordAlertsTrader import gui_layouts as gl
-from DiscordAlertsTrader.discord_bot import DiscordBot
+from DiscordAlertsTrader.brokerages import get_brokerage
 from DiscordAlertsTrader.configurator import cfg, channel_ids
-from DiscordAlertsTrader.message_parser import parse_trade_alert, ordersymb_to_str
-# A fix for Macs
-os.environ['QT_MAC_WANTS_LAYER'] = '1'
+from DiscordAlertsTrader.discord_bot import DiscordBot
+from DiscordAlertsTrader.message_parser import ordersymb_to_str, parse_trade_alert
 
 
-def match_authors(author_str:str)->str:
-    """Author have an identifier in discord, it will try to find full author name
-
-    Parameters
-    ----------
-    author_str : str
-        string to match the author
-
-    Returns
-    -------
-    str
-        author with identifier
-    """
+def match_authors(author_str: str) -> str:
+    """Author have an identifier in discord, it will try to find full author name"""
     if "#" in author_str:
         return author_str
     authors = []
     for chn in channel_ids.keys():
-        at = pd.read_csv(op.join(cfg['general']['data_dir'] , f"{chn}_message_history.csv"))["Author"].unique()
-        authors.extend(at)
+        fname = op.join(cfg["general"]["data_dir"], f"{chn}_message_history.csv")
+        if op.exists(fname):
+            at = pd.read_csv(fname)["Author"].unique()
+            authors.extend(at)
     authors = list(dict.fromkeys(authors))
-    
-    authors += cfg['discord']['authors_subscribed'].split(',')
+
+    authors += cfg["discord"]["authors_subscribed"].split(",")
     authors = [a for a in authors if author_str.lower() in a.lower()]
     if len(authors) == 0:
         author = author_str
@@ -58,24 +52,25 @@ def match_authors(author_str:str)->str:
         author = authors[0]
     return author
 
+
 def split_alert_message(gui_msg):
+    """Split alert message into author and message"""
     # extra comas
-    if len(gui_msg.split(','))>2:
-        splt = gui_msg.split(',')
+    if len(gui_msg.split(",")) > 2:
+        splt = gui_msg.split(",")
         author = splt[0]
         msg = ",".join(splt[1:])
     # one coma
-    elif len(gui_msg.split(','))==2:
-        author, msg = gui_msg.split(',')
+    elif len(gui_msg.split(",")) == 2:
+        author, msg = gui_msg.split(",")
     # one colon
-    elif len(gui_msg.split(':'))==2:
-        author, msg = gui_msg.split(':')
+    elif len(gui_msg.split(":")) == 2:
+        author, msg = gui_msg.split(":")
     # extra colons
-    elif len(gui_msg.split(':'))>2:
-        splt = gui_msg.split(':')
+    elif len(gui_msg.split(":")) > 2:
+        splt = gui_msg.split(":")
         author = splt[0]
         msg = ":".join(splt[1:])
-        
     # no colon or coma
     else:
         print("No colon or coma in message, author not found, assuming no author")
@@ -83,543 +78,524 @@ def split_alert_message(gui_msg):
         msg = gui_msg
     return author, msg
 
+
 def get_live_quotes(symbol, tracker, max_delay=2):
-    dir_quotes = cfg['general']['data_dir'] + '/live_quotes'
-    
+    """Get live quotes for a symbol"""
+    dir_quotes = cfg["general"]["data_dir"] + "/live_quotes"
+
     fquote = f"{dir_quotes}/{symbol}.csv"
     if not op.exists(fquote):
         quote = tracker.price_now(symbol, "both")
         if quote is None:
-            return None, None        
+            return None, None
         return quote
-    
+
     with open(fquote, "r") as f:
         quotes = f.readlines()
-    
+
     now = time.time()
     get_live = False
     try:
-        tmp = quotes[-1].split(',') # in s  
+        tmp = quotes[-1].split(",")  # in s
         if len(tmp) == 3:
             timestamp, bid, ask = tmp
         else:
             timestamp, ask = tmp
             bid = ask
-        ask = ask.strip().replace('\n', '')
+        ask = ask.strip().replace("\n", "")
         quote = [ask, bid]
     except:
         print("Error reading quote", symbol, quotes[-1])
         get_live = True
-    
+
     timestamp = eval(timestamp)
     if max_delay is not None:
         if now - timestamp > max_delay:
             get_live = True
-    
+
     if get_live:
         quote = tracker.price_now(symbol, "both")
         if quote is None:
-            return None, None        
+            return None, None
         return quote
     return quote
 
 
 def quotes_plotting(symbol, trader=None, tracker=None):
-    dir_quotes = cfg['general']['data_dir'] + '/live_quotes'
-    
-    fquote = f"{dir_quotes}/{symbol}.csv"
-    if not op.exists(fquote):      
-        return None
-    
-    quotes = pd.read_csv(fquote)
-    
-    quotes['date'] = pd.to_datetime(quotes['timestamp'], unit='s', utc=True).dt.tz_convert('America/New_York')
-    quotes['date'] = quotes['date'].dt.tz_localize(None)
-    quotes['ask'] = quotes[' quote_ask']
-    quotes['bid'] = quotes[' quote']
+    """Plot historical quotes for a symbol"""
+    dir_quotes = cfg["general"]["data_dir"] + "/live_quotes"
 
-    quotes = quotes[quotes['date'].dt.date == datetime.now().date()]
-    quotes = quotes[quotes['ask'] > 0]
-    quotes.set_index('date', inplace=True)
-    
-    quotes[['ask', 'bid']].plot(alpha=0.5)
-    
+    fquote = f"{dir_quotes}/{symbol}.csv"
+    if not op.exists(fquote):
+        return None
+
+    quotes = pd.read_csv(fquote)
+
+    quotes["date"] = pd.to_datetime(
+        quotes["timestamp"], unit="s", utc=True
+    ).dt.tz_convert("America/New_York")
+    quotes["date"] = quotes["date"].dt.tz_localize(None)
+    quotes["ask"] = quotes[" quote_ask"]
+    quotes["bid"] = quotes[" quote"]
+
+    quotes = quotes[quotes["date"].dt.date == datetime.now().date()]
+    quotes = quotes[quotes["ask"] > 0]
+    quotes.set_index("date", inplace=True)
+
+    quotes[["ask", "bid"]].plot(alpha=0.5)
+
     for tt in [trader, tracker]:
         if tt is not None:
-            tts  = tt.portfolio[(tt.portfolio['Symbol'] == symbol) &
-                                (pd.to_datetime(tt.portfolio['Date']).dt.date == datetime.now().date()) ]
+            tts = tt.portfolio[
+                (tt.portfolio["Symbol"] == symbol)
+                & (
+                    pd.to_datetime(tt.portfolio["Date"]).dt.date
+                    == datetime.now().date()
+                )
+            ]
             if len(tts):
                 for ix, row in tts.iterrows():
-                    if str(tt.__class__) == "<class 'DiscordAlertsTrader.alerts_tracker.AlertsTracker'>":                        
-                        plt.plot(pd.to_datetime(row['Date']), row['Price'], 'go')
-                        plt.text(pd.to_datetime(row['Date']), row['Price']*1.009, f"track:{row['Trader']}: {row['Type']}", fontsize=12, color='g', rotation=45)
-                        if not pd.isna(row['STC-Date']):
-                            plt.plot(pd.to_datetime(row['STC-Date']), row['STC-Price'], 'ro')
-                            plt.text(pd.to_datetime(row['STC-Date']), row['STC-Price']*1.009, f"track:{row['Trader']}: Closed", fontsize=12, color='red', rotation=45)
+                    if (
+                        str(tt.__class__)
+                        == "<class 'DiscordAlertsTrader.alerts_tracker.AlertsTracker'>"
+                    ):
+                        plt.plot(pd.to_datetime(row["Date"]), row["Price"], "go")
+                        plt.text(
+                            pd.to_datetime(row["Date"]),
+                            row["Price"] * 1.009,
+                            f"track:{row['Trader']}: {row['Type']}",
+                            fontsize=12,
+                            color="g",
+                            rotation=45,
+                        )
+                        if not pd.isna(row["STC-Date"]):
+                            plt.plot(
+                                pd.to_datetime(row["STC-Date"]), row["STC-Price"], "ro"
+                            )
+                            plt.text(
+                                pd.to_datetime(row["STC-Date"]),
+                                row["STC-Price"] * 1.009,
+                                f"track:{row['Trader']}: Closed",
+                                fontsize=12,
+                                color="red",
+                                rotation=45,
+                            )
                     else:
-                        plt.plot(pd.to_datetime(row['Date']), row['Price'], 'go')
-                        plt.plot(pd.to_datetime(row['Date']), row['Price'], 'kx')
-                        plt.text(pd.to_datetime(row['Date']), row['Price']*1.009, f"port:{row['Trader']} {row['Type']}", fontsize=12, color='g', rotation=45)
-                        cols = [c for c in tts.columns if c.startswith('STC') and c.endswith('-Date')]
+                        plt.plot(pd.to_datetime(row["Date"]), row["Price"], "go")
+                        plt.plot(pd.to_datetime(row["Date"]), row["Price"], "kx")
+                        plt.text(
+                            pd.to_datetime(row["Date"]),
+                            row["Price"] * 1.009,
+                            f"port:{row['Trader']} {row['Type']}",
+                            fontsize=12,
+                            color="g",
+                            rotation=45,
+                        )
+                        cols = [
+                            c
+                            for c in tts.columns
+                            if c.startswith("STC") and c.endswith("-Date")
+                        ]
                         for c in cols:
                             if pd.isna(row[c]):
                                 continue
-                            print(row[c])
-                            plt.plot(pd.to_datetime(row[c]), row[c.split("-")[0] + '-Price'], 'ro')
-                            plt.plot(pd.to_datetime(row[c]), row[c.split("-")[0] + '-Price'], 'kx')
-                            plt.text(pd.to_datetime(row[c]), row[c.split("-")[0] + '-Price']*1.009, f"port:{row['Trader']}: Closed", fontsize=12, color='red', rotation=45)
+                            plt.plot(
+                                pd.to_datetime(row[c]),
+                                row[c.split("-")[0] + "-Price"],
+                                "ro",
+                            )
+                            plt.plot(
+                                pd.to_datetime(row[c]),
+                                row[c.split("-")[0] + "-Price"],
+                                "kx",
+                            )
+                            plt.text(
+                                pd.to_datetime(row[c]),
+                                row[c.split("-")[0] + "-Price"] * 1.009,
+                                f"port:{row['Trader']}: Closed",
+                                fontsize=12,
+                                color="red",
+                                rotation=45,
+                            )
     plt.tight_layout()
     plt.title(symbol)
     plt.show(block=False)
 
 
-def fit_table_elms(Widget_element):
-    Widget_element.resizeRowsToContents()
-    Widget_element.resizeColumnsToContents()
-    Widget_element.resizeRowsToContents()
-    Widget_element.resizeColumnsToContents()
+class DiscordAlertsTraderGUI:
+    def __init__(self):
+        print("Initializing GUI...")
 
-# sg.theme('Dark Blue 3')
-sg.SetOptions(font=("Helvitica 13"))
+        # Create main window using ttkbootstrap
+        self.root = ttk_boot.Window(themename="darkly")
+        self.root.title("Discord Alerts Trader")
+        self.root.geometry("1400x900")
 
-fnt_b = "Helvitica 11"
-fnt_h = "Helvitica 13"
+        # Initialize data structures
+        self.widgets = {}
+        self.gui_data = {}
+        self.port_exc = {
+            "Closed": False,
+            "Open": False,
+            "NegPnL": False,
+            "PosPnL": False,
+            "live PnL": False,
+            "stocks": True,
+            "options": False,
+            "bto": False,
+            "stc": False,
+            "Canceled": True,
+            "Rejected": False,
+        }
+        self.track_exc = self.port_exc.copy()
+        self.stat_exc = self.port_exc.copy()
 
-ly_cons, MLINE_KEY = gl.layout_console('Discord messages from all the channels', '-MLINE-')
-ly_cons_subs, MLINE_SUBS_KEY = gl.layout_console('Discord messages only from subscribed authors',
-                                       '-MLINEsub-')
+        # Initialize brokerage session
+        self.bksession = get_brokerage()
+        bk_name = "None" if self.bksession is None else self.bksession.name
+        self.root.title(f"Discord Alerts Trader - with broker {bk_name}")
 
-print(1)
-gui_data = {}
-gui_data['port'] = gg.get_portf_data()
-ly_port = gl.layout_portfolio(gui_data['port'], fnt_b, fnt_h)
+        # Create notebook (tabbed interface)
+        self.notebook = ttk.Notebook(self.root)
+        self.notebook.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
-gui_data['trades'] = gg.get_tracker_data()
-ly_track = gl.layout_traders(gui_data['trades'], fnt_b, fnt_h)
+        # Create tabs
+        self.create_message_tabs()
+        self.create_portfolio_tab()
+        self.create_analysts_tab()
+        self.create_stats_tab()
+        if self.bksession is not None:
+            self.create_account_tab()
+        self.create_config_tab()
 
-gui_data['stats'] = gg.get_stats_data()
-ly_stats = gl.layout_stats(gui_data['stats'], fnt_b, fnt_h)
-print(2)
+        # Create trigger alerts section at bottom
+        self.create_trigger_section()
 
-chns = channel_ids.keys()
-ly_chns = []
-for chn in chns:
-    chn_fname = cfg['general']['data_dir']+f"/{chn}_message_history.csv"
-    if not op.exists(chn_fname):
-        os.makedirs(cfg['general']['data_dir'], exist_ok=True)
-        pd.DataFrame(columns=cfg["col_names"]['chan_hist'].split(',')).to_csv(chn_fname, index=False)
-    gui_data[chn] = gg.get_hist_msgs(chan_name=chn)
-    ly_ch = gl.layout_chan_msg(chn, gui_data[chn], fnt_b, fnt_h)
-    ly_chns.append(ly_ch)
+        # Initialize Discord bot
+        print("Initializing Discord bot...")
+        self.trade_events = queue.Queue(maxsize=20)
+        self.alistner = DiscordBot(self.trade_events, brokerage=self.bksession, cfg=cfg)
 
-bksession = get_brokerage()
-ly_accnt = gl.layout_account(bksession, fnt_b, fnt_h)
-ly_conf = gl.layout_config(fnt_b, cfg)
-msg_tab = [[sg.TabGroup([[sg.Tab(c, h) for c, h in zip(chns, ly_chns)],
-                        ], title_color='black')]]
-layout = [[sg.TabGroup([
-                        [sg.Tab("Msgs Subs", ly_cons_subs, font=fnt_b)],
-                        [sg.Tab("Msgs All", ly_cons, font=fnt_b)], 
-                        [sg.Tab('Portfolio', ly_port)],
-                        [sg.Tab('Analysts Portfolio', ly_track)],
-                        [sg.Tab('Analysts Stats', ly_stats)],
-                        [sg.Tab('Msg History',msg_tab)],                        
-                        [sg.Tab("Account", ly_accnt)],
-                        [sg.Tab("Config", ly_conf)]
-                        ], title_color='black', font=fnt_b)],
-        ]
-layout += gl.trigger_alerts_layout()
-print(3)
-bk_name = "None" if bksession is None else bksession.name
-window = sg.Window(f'Discord Alerts Trader - with broker {bk_name}', layout,size=(100, 800), # force_toplevel=True,
-                    auto_size_text=True, resizable=True)
-print(4)
-def mprint_queue(queue_item_list, subscribed_author=False):
-    # queue_item_list = [string, text_color, background_color]
-    kwargs = {}
-    text = queue_item_list[0]
-    len_que = len(queue_item_list)
-    if len_que == 2:
-        kwargs["text_color"] = queue_item_list[1]
-    elif len_que == 3:
-        tcol = queue_item_list[1]
-        tcol = "black" if tcol == "" else tcol
-        kwargs["text_color"] = tcol
+        # Start background threads
+        self.start_background_threads()
 
-        bcol = queue_item_list[2]
-        bcol = "white" if bcol == "" else bcol
-        kwargs["background_color"] = bcol
+        # Start event loops
+        self.root.after(100, self.check_events)
 
-    window[MLINE_KEY].print(text, **kwargs)
-    if subscribed_author or len_que == 3:
-        window[MLINE_SUBS_KEY].print(text, **kwargs)
+        print("GUI initialization complete!")
 
-def update_portfolios_thread(window):
-    while True:
-        time.sleep(60)
-        window["_upd-portfolio_"].click()
-        time.sleep(2)  
-        window["_upd-track_"].click()
-print(5)
-event, values = window.read(.1)
+    def create_message_tabs(self):
+        """Create message console tabs"""
+        # Msgs Subs tab
+        msgs_subs_frame, self.msgs_subs_text, _ = gl.create_console_frame(
+            self.notebook, "Discord messages only from subscribed authors", "-MLINEsub-"
+        )
+        self.notebook.add(msgs_subs_frame, text="Msgs Subs")
+        self.widgets["-MLINEsub-"] = self.msgs_subs_text
 
-els = ['_portfolio_', '_track_', ] + [f"{chn}_table" for chn in chns]
-els = els + ['_orders_', '_positions_'] if bksession is not None else els
-for el in els:
-    try:
-        fit_table_elms(window.Element(el).Widget)
-    except:
-        pass
+        # Msgs All tab
+        msgs_all_frame, self.msgs_all_text, _ = gl.create_console_frame(
+            self.notebook, "Discord messages from all the channels", "-MLINE-"
+        )
+        self.notebook.add(msgs_all_frame, text="Msgs All")
+        self.widgets["-MLINE-"] = self.msgs_all_text
 
-for chn in chns:
-    table = window[f"{chn}_table"].Widget.horizontalHeader()
-    # QHeaderView.Stretch
-    # table.setSectionResizeMode(2, QHeaderView.Stretch) ## giving error PySide6.QtWidgets.QHeaderView.setSectionResizeMode: name 'PySide6' is not defined"
-    window[f"{chn}_table"].Widget.scrollToBottom()
+    def create_portfolio_tab(self):
+        """Create portfolio tab"""
+        print("Creating portfolio tab...")
+        self.gui_data["port"] = gg.get_portf_data()
+        port_frame, port_widgets = gl.create_portfolio_frame(
+            self.notebook,
+            self.gui_data["port"],
+            ("Helvetica", 10),
+            ("Helvetica", 11, "bold"),
+        )
+        self.notebook.add(port_frame, text="Portfolio")
+        self.widgets.update(port_widgets)
 
-print(6)
-event, values = window.read(.1)
-print(7)
-trade_events = queue.Queue(maxsize=20)
-alistner = DiscordBot(trade_events, brokerage=bksession, cfg=cfg)
-print(8)
-threading.Thread(target=update_portfolios_thread, args=(window,), daemon=True).start()
-print(9)
-event, values = window.read(.1)
+        # Bind update button
+        if "_upd-portfolio_" in port_widgets:
+            port_widgets["_upd-portfolio_"].config(command=self.update_portfolio)
 
-# exclusion filters for the portfolio and analysts tabs
-port_exc = {"Closed":False,
-            "Open":False,
-            "NegPnL":False,
-            "PosPnL":False,
-            "live PnL":False,
-            "stocks":True,
-            "options":False,
-            'bto':False,
-            "stc":False,
-            }
-track_exc = port_exc.copy()
-stat_exc = port_exc.copy()
-port_exc["Canceled"] = True
-port_exc["Rejected"] = False
+        # Bind checkboxes
+        for key in self.port_exc.keys():
+            checkbox_key = f"-port-{key}"
+            if checkbox_key in port_widgets:
+                port_widgets[checkbox_key].config(
+                    command=lambda k=key: self.toggle_port_filter(k)
+                )
 
-print(10)
-dt, _  = gg.get_tracker_data(track_exc, **values)
-window.Element('_track_').Update(values=dt)
-fit_table_elms(window.Element("_track_").Widget)
-dt, hdr = gg.get_portf_data(port_exc)
-window.Element('_portfolio_').Update(values=dt)
-fit_table_elms(window.Element("_portfolio_").Widget)
-dt, hdr = gg.get_stats_data(stat_exc)
-window.Element('_stat_').Update(values=dt)
-fit_table_elms(window.Element("_stat_").Widget)
+    def create_analysts_tab(self):
+        """Create analysts portfolio tab"""
+        print("Creating analysts tab...")
+        self.gui_data["trades"] = gg.get_tracker_data()
+        track_frame, track_widgets = gl.create_traders_frame(
+            self.notebook,
+            self.gui_data["trades"],
+            ("Helvetica", 10),
+            ("Helvetica", 11, "bold"),
+        )
+        self.notebook.add(track_frame, text="Analysts Portfolio")
+        self.widgets.update(track_widgets)
 
+        # Bind update button
+        if "_upd-track_" in track_widgets:
+            track_widgets["_upd-track_"].config(command=self.update_analysts)
 
-def run_gui():  
-    subs_auth_msg = False
-    auth_subs = cfg['discord']['authors_subscribed'].split(',')
-    auth_subs = [i.split("#")[0].strip() for i in auth_subs]
-    ori_color = 'black'
-    while True: 
-        event, values = window.read(1)#.1)
+    def create_stats_tab(self):
+        """Create statistics tab"""
+        print("Creating stats tab...")
+        self.gui_data["stats"] = gg.get_stats_data()
+        stats_frame, stats_widgets = gl.create_stats_frame(
+            self.notebook,
+            self.gui_data["stats"],
+            ("Helvetica", 10),
+            ("Helvetica", 11, "bold"),
+        )
+        self.notebook.add(stats_frame, text="Analysts Stats")
+        self.widgets.update(stats_widgets)
 
-        if event == sg.WINDOW_CLOSED:
-            break
+        # Bind update button
+        if "_upd-stat_" in stats_widgets:
+            stats_widgets["_upd-stat_"].config(command=self.update_stats)
 
-        # Prefill trigger alert message
-        if ('_portfolio_' in event and values['_portfolio_'] != []) or \
-            ('_track_' in event and values['_track_'] != []):  
-            if '_portfolio_' in event:
-                pix = values['_portfolio_'][0] 
-                dt, hdr = gg.get_portf_data(port_exc, **values)
-                if len(dt) and len(dt) > pix:
-                    qty = dt[pix][hdr.index('filledQty')]
-                else:
-                    qty = ""
-            else:
-                pix = values['_track_'][0]
-                dt, hdr = gg.get_tracker_data(track_exc, **values)
-                qty = dt[pix][hdr.index('Qty')]  
-            qty = qty if qty == "" else int(float(qty)) 
+    def create_account_tab(self):
+        """Create account tab"""
+        print("Creating account tab...")
+        acc_frame, acc_widgets = gl.create_account_frame(
+            self.notebook, self.bksession, ("Helvetica", 10), ("Helvetica", 11, "bold")
+        )
+        self.notebook.add(acc_frame, text="Account")
+        self.widgets.update(acc_widgets)
+
+        # Bind update button
+        if "acc_updt" in acc_widgets:
+            acc_widgets["acc_updt"].config(command=self.update_account)
+
+    def create_config_tab(self):
+        """Create configuration tab"""
+        print("Creating config tab...")
+        cfg_frame, cfg_widgets = gl.create_config_frame(self.notebook, "Helvetica", cfg)
+        self.notebook.add(cfg_frame, text="Config")
+        self.widgets.update(cfg_widgets)
+
+        # Bind save button
+        if "cfg_button" in cfg_widgets:
+            cfg_widgets["cfg_button"].config(command=self.save_config)
+
+    def create_trigger_section(self):
+        """Create trigger alerts section at bottom"""
+        trigger_frame, trigger_widgets = gl.create_trigger_alerts_frame(self.root)
+        trigger_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=5, pady=5)
+        self.widgets.update(trigger_widgets)
+
+        # Bind trigger button
+        if "-subm-alert" in trigger_widgets:
+            trigger_widgets["-subm-alert"].config(command=self.trigger_alert)
+
+        # Bind toggle button
+        if "-toggle" in trigger_widgets:
+            trigger_widgets["-toggle"].config(command=self.toggle_alert_buttons)
+
+    def toggle_alert_buttons(self):
+        """Toggle visibility of alert action buttons"""
+        toggle_btn = self.widgets.get("-toggle")
+        if toggle_btn:
+            current_text = toggle_btn.cget("text")
+            new_text = "▼" if current_text == "▲" else "▲"
+            toggle_btn.config(text=new_text)
+
+            # Toggle visibility of action buttons
+            visible = new_text == "▼"
+            button_keys = [
+                "-alert_to-",
+                "-alert_BTO",
+                "-alert_STC",
+                "-alert_STO",
+                "-alert_BTC",
+                "-alert_exitupdate",
+                "-alert_quotes",
+                "-alert_plot",
+                "-alert_tome",
+                "-alert_tomeshort",
+                "-alert_exits",
+            ]
+
+            for key in button_keys:
+                if key in self.widgets:
+                    if visible:
+                        self.widgets[key].pack(side=tk.LEFT, padx=2)
+                    else:
+                        self.widgets[key].pack_forget()
+
+    def update_portfolio(self):
+        """Update portfolio display"""
+        print("Updating portfolio...")
+        dt, _ = gg.get_portf_data(self.port_exc)
+        if "_portfolio_" in self.widgets:
+            tree = self.widgets["_portfolio_"]
+            # Clear existing data
+            for item in tree.get_children():
+                tree.delete(item)
+            # Insert new data
+            for row_idx, row_data in enumerate(dt):
+                tag = "evenrow" if row_idx % 2 == 0 else "oddrow"
+                tree.insert(
+                    "", tk.END, text=str(row_idx + 1), values=row_data, tags=(tag,)
+                )
+
+    def update_analysts(self):
+        """Update analysts portfolio display"""
+        print("Updating analysts portfolio...")
+        dt, _ = gg.get_tracker_data(self.track_exc)
+        if "_track_" in self.widgets:
+            tree = self.widgets["_track_"]
+            for item in tree.get_children():
+                tree.delete(item)
+            for row_idx, row_data in enumerate(dt):
+                tag = "evenrow" if row_idx % 2 == 0 else "oddrow"
+                tree.insert(
+                    "", tk.END, text=str(row_idx + 1), values=row_data, tags=(tag,)
+                )
+
+    def update_stats(self):
+        """Update statistics display"""
+        print("Updating stats...")
+        dt, _ = gg.get_stats_data(self.stat_exc)
+        if "_stat_" in self.widgets:
+            tree = self.widgets["_stat_"]
+            for item in tree.get_children():
+                tree.delete(item)
+            for row_idx, row_data in enumerate(dt):
+                tag = "evenrow" if row_idx % 2 == 0 else "oddrow"
+                tree.insert(
+                    "", tk.END, text=str(row_idx + 1), values=row_data, tags=(tag,)
+                )
+
+    def update_account(self):
+        """Update account information"""
+        print("Updating account...")
+        if self.bksession:
+            gl.update_acct_frame(self.bksession, self.widgets)
+
+    def toggle_port_filter(self, key):
+        """Toggle portfolio filter"""
+        checkbox_key = f"-port-{key}"
+        if checkbox_key in self.widgets:
+            self.port_exc[key] = self.widgets[checkbox_key].var.get()
+            self.update_portfolio()
+
+    def save_config(self):
+        """Save configuration changes"""
+        print("Saving configuration...")
+        for k, widget in self.widgets.items():
+            if k.startswith("cfg"):
+                f1, f2 = k.replace("cfg_", "").split(".")
+                if hasattr(widget, "var"):  # Checkbutton
+                    cfg[f1][f2] = str(widget.var.get())
+                elif isinstance(widget, (ttk.Entry, ttk.Combobox)):
+                    cfg[f1][f2] = widget.get()
+        print("Configuration saved!")
+
+    def trigger_alert(self):
+        """Trigger an alert manually"""
+        msg_widget = self.widgets.get("-subm-msg")
+        chan_widget = self.widgets.get("_chan_trigg_")
+
+        if msg_widget and chan_widget:
             try:
-                symb = dt[pix][hdr.index('Symbol')]
-            except: 
-                continue   
-            auth = match_authors(dt[pix][hdr.index('Trader')])
-            
-            price = ""
-            if "Live" in hdr:
-                price = dt[pix][hdr.index('Live')]
-            if price == "":
-                price = dt[pix][hdr.index('S-Price-actual')]
-            if price == "":
-                price = dt[pix][hdr.index('S-Price')]
-            if 'Type' in hdr:
-                action = dt[pix][hdr.index('Type')]
-                if action == "BTO":
-                    action = "STC"
-                elif action == "STO":
-                    action = "BTC"
-            else:
-                action = "STC"
-            price = price if price == "" else float(price)
-            if "_" in symb:
-                # option
-                exp = r"(\w+)_(\d{6})([CP])([\d.]+)"        
-                match = re.search(exp, symb, re.IGNORECASE)
-                if match:
-                    symbol, date, type, strike = match.groups()
-                    symb_str = f"{auth}, {action} {qty} {symbol} {strike}{type} {date[:2]}/{date[2:4]} @{price}"
-            else:
-                symb_str= f"{auth}, {action} {qty} {symb} @{price}"
-            window.Element("-subm-msg").Update(value=symb_str)
-        # handle alert buttons
-        elif event == '-toggle':
-            state = window[event].GetText()
-            butts = ['-alert_to-', '-alert_BTO', '-alert_STC', '-alert_STO', '-alert_BTC', '-alert_exitupdate',
-                     '-alert_quotes', '-alert_plot', '-alert_tome', '-alert_tomeshort', '-alert_exits' ]
-            if state == '▲':
-                window[event].update(text='▼')            
-            else:
-                window[event].update(text='▲')
-            for el in butts:
-                window[el].update(visible=state == '▲')
-                
-        elif event.startswith('-alert_' ):
-            print(event)
-            ori_col = window.Element(event).ButtonColor
-            window.Element(event).Update(button_color=("black", "white"))
-            window.refresh()            
-
-            action = event.split('_')[1]
-            
-            msg_split = split_alert_message(values['-subm-msg'])
-            if len(msg_split) == 2:
-                author, alert = msg_split
-            else:
-                author, alert = "author", msg_split[0]
-            
-            if event.startswith('-alert_tome'):
-                author = "me" if event == '-alert_tome' else "me_short"
-                msg = f"{author}, {alert.strip()}"
-                window.Element("-subm-msg").Update(value=msg)
-                window.Element(event).Update(button_color=ori_col)
-                continue   
-
-            # fix missing price, none price, no action
-            if "@" not in alert:
-                alert += " @0.01"
-            if  not len([p for p in ["BTO", "STO", "BTC", "STC"] if p in alert]):
-                alert = "BTO " + alert                
-            alert = alert.replace("@None", "@0.01").replace("@m", "@0.01")
-            _, order = parse_trade_alert(alert)
-
-            if order is None:
-                window.Element(event).Update(button_color=ori_col)
-                continue
-            
-            if '-alert_plot' in event:
-                # get live quotes and plot
-                quotes_plotting(order['Symbol'], alistner.trader, alistner.tracker)
-                window.Element(event).Update(button_color=ori_col)
-                continue
-            
-            ask, bid = get_live_quotes(order['Symbol'], alistner.tracker)
-            if action in ["BTO", "BTC"] or order['action'] in ["BTO", "BTC"]:
-                price = ask
-            elif action in ["STO", "STC"] or order['action'] in ["STO", "STC"]:
-                price = bid
-            else:
-                price = ask
-            if price is None:
-                price = order.get('price', 0.01)
-            symbol = ordersymb_to_str(order['Symbol'])
-            if order.get('Qty') is None:
-                order['Qty'] = 1
-            if action =='exitupdate':
-                msg =  f"{author}, Exit Update {symbol} PT 50% SL 50%"
-            elif action == 'exits':
-                msg =  f"{author}, Exit Update {symbol} PT1 20% PT2 40% PT3 60% SL 50%"
-            elif action == 'quotes': 
-                action_msg = order['action'].replace('ExitUpdate', "BTO")
-                
-                msg =  f"{author}, {action_msg} {order['Qty']} {symbol} @{price} | [ask {ask} bid {bid}]" 
-            else:
-                msg =  f"{author}, {action} {order['Qty']} {symbol} @{price}" 
-                
-            window.Element("-subm-msg").Update(value=msg)
-            window.Element(event).Update(button_color=ori_col)
-            
-        elif event == "_upd-portfolio_": # update button in portfolio
-            ori_col = window.Element(event).ButtonColor
-            window.Element(event).Update(button_color=("black", "white"))
-            window.refresh()
-            dt, _ = gg.get_portf_data(port_exc, **values)
-            window.Element('_portfolio_').Update(values=dt)
-            fit_table_elms(window.Element("_portfolio_").Widget)
-            window.Element(event).Update(button_color=ori_col)
-
-            
-        elif event == "cfg_button":
-            ori_col = window.Element(event).ButtonColor
-            window.Element(event).Update(button_color=("black", "white"))
-            window.refresh()
-            for k, v in values.items():
-                if k.startswith("cfg"):
-                    if isinstance(window[k], sg.Checkbox):
-                        continue
-                    if window.Element(k).TextColor == 'red':
-                        window.Element(k).Update(text_color=ori_color)
-                    f1,f2 = k.replace("cfg_", "").split(".")
-                    cfg[f1][f2] = str(v)
-            window.Element(event).Update(button_color=ori_col)
-
-        elif event.startswith("cfg"):
-            # print(event)
-            if isinstance(window[event], sg.Checkbox):
-                f1,f2 = event.replace("cfg_", "").split(".")
-                # print("before", cfg[f1][f2])
-                cfg[f1][f2] = str(values[event])
-                print("changed", cfg[f1][f2])
-            else:
-                cur_color = window.Element(event).TextColor
-                if cur_color != "red":
-                    ori_color = cur_color
-                window.Element(event).Update(text_color="red")
-            
-        elif event == "_upd-track_": # update button in analyst alerts
-            ori_col = window.Element(event).ButtonColor
-            window.Element(event).Update(button_color=("black", "white"))
-            window.refresh()
-            dt, _  = gg.get_tracker_data(track_exc, **values)
-            window.Element('_track_').Update(values=dt)
-            fit_table_elms(window.Element("_track_").Widget)
-            window.Element(event).Update(button_color=ori_col)
-
-        elif event == "_upd-stat_": # update button in analyst stats
-            ori_col = window.Element(event).ButtonColor
-            window.Element(event).Update(button_color=("black", "white"))
-            window.refresh()
-            dt, _  = gg.get_stats_data(stat_exc, **values)
-            window.Element('_stat_').Update(values=dt)
-            fit_table_elms(window.Element("_stat_").Widget)
-            window.Element(event).Update(button_color=ori_col)
-
-        elif event.startswith("-port-"): # radial click, update portfolio
-            key =  event.replace("-port-", "")
-            state = window.Element(event).get()
-            port_exc[key] = state
-            dt, _ = gg.get_portf_data(port_exc, **values)
-            window.Element('_portfolio_').Update(values=dt)
-
-        elif event.startswith("-track-"): # radial click, update analyst alerts
-            key =  event.replace("-track-", "")
-            state = window.Element(event).get()
-            track_exc[key] = state
-            dt, _ = gg.get_tracker_data(track_exc, **values)
-            window.Element('_track_').Update(values=dt)
-
-        elif event.startswith("-stat-"): # radial click, update analyst stats
-            key =  event.replace("-stat-", "")
-            state = window.Element(event).get()
-            stat_exc[key] = state
-            dt, _ = gg.get_stats_data(stat_exc, **values)
-            window.Element('_stat_').Update(values=dt)
-
-        elif event[-3:] == "UPD":
-            chn = event[:-4]
-            ori_col = window.Element(event).ButtonColor
-            window.Element(event).Update(button_color=("black", "white"))
-            window.refresh()
-
-            args = {}
-            for k, v in values.items():
-                if k[:len(chn)] == chn:
-                    args[k[len(chn)+1:]] = v
-            dt, _  = gg.get_hist_msgs(chan_name=chn, **args)
-            window.Element(f"{chn}_table").Update(values=dt)
-
-            fit_table_elms(window.Element(f"{chn}_table").Widget)
-            window.Element(event).Update(button_color=ori_col)
-
-        elif event == 'acc_updt':
-            ori_col = window.Element(event).ButtonColor
-            window.Element(event).Update(button_color=("black", "white"))
-            window.refresh()
-            gl.update_acct_ly(bksession, window)
-            fit_table_elms(window.Element(f"_positions_").Widget)
-            fit_table_elms(window.Element(f"_orders_").Widget)
-            window.Element(event).Update(button_color=ori_col)
-
-        elif event == "-subm-alert":
-            ori_col = window.Element(event).ButtonColor
-            window.Element(event).Update(button_color=("black", "white"))
-            window.refresh()    
-            try:        
-                author,msg = split_alert_message(values['-subm-msg'])
+                gui_msg = msg_widget.get()
+                author, msg = split_alert_message(gui_msg)
                 author = match_authors(author.strip())
                 msg = msg.strip().replace("SPXW", "SPX")
                 date = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
-                chan = "GUI_" + values["_chan_trigg_"]
-                print(chan)
-                new_msg = pd.Series({
-                    'AuthorID': None,
-                    'Author': author,
-                    'Date': date, 
-                    'Content': msg,
-                    'Channel': chan
-                    })
-                alistner.new_msg_acts(new_msg, from_disc=False)
-                window.Element(event).Update(button_color=ori_col)
-            except Exception as e:
-                print("Trigger alerts with error:", e)
-                window.Element(event).Update(button_color=ori_col)
-                continue
+                chan = "GUI_" + chan_widget.get()
 
+                new_msg = pd.Series(
+                    {
+                        "AuthorID": None,
+                        "Author": author,
+                        "Date": date,
+                        "Content": msg,
+                        "Channel": chan,
+                    }
+                )
+                self.alistner.new_msg_acts(new_msg, from_disc=False)
+                print(f"Alert triggered: {author} - {msg}")
+            except Exception as e:
+                print(f"Error triggering alert: {e}")
+
+    def start_background_threads(self):
+        """Start background update threads"""
+
+        def update_portfolios_loop():
+            while True:
+                time.sleep(60)
+                try:
+                    self.root.after(0, self.update_portfolio)
+                    time.sleep(2)
+                    self.root.after(0, self.update_analysts)
+                except:
+                    pass
+
+        threading.Thread(target=update_portfolios_loop, daemon=True).start()
+
+        def run_discord_client():
+            if len(cfg["discord"]["discord_token"]) < 50:
+                str_prt = "Discord token not provided, no discord messages will be received. Add user token in config.ini"
+                print(str_prt)
+                self.trade_events.put([str_prt, "", "red"])
+                return
+            self.alistner.run(cfg["discord"]["discord_token"])
+
+        threading.Thread(target=run_discord_client, daemon=True).start()
+
+    def check_events(self):
+        """Check for Discord events and update GUI"""
         try:
-            event_feedb = trade_events.get(False)
-            # if message from subscribed author or channel flag it to print in both consoles
-            if event_feedb[1] == "blue":
-                author = event_feedb[0].split("\n\t")[1].split(":")[0]
-                chan = event_feedb[0].split(": \n\t")[0].split(" ")[-1]
-                if any(a == author for a in auth_subs):
-                    subs_auth_msg = True
-                elif cfg['discord']['channelwise_subscription'].split(",") != [""] and \
-                    any([c.strip() == chan for c in cfg['discord']['channelwise_subscription'].split(",")]):
-                    subs_auth_msg = True
-                elif cfg['discord']['authorwise_subscription'].split(",") != [""] and \
-                    any([c.strip() == author for c in cfg['discord']['authorwise_subscription'].split(",")]):
-                    subs_auth_msg = True
-                else:
-                    subs_auth_msg = False
-            
-            mprint_queue(event_feedb, subs_auth_msg)
+            while True:
+                event_feedb = self.trade_events.get_nowait()
+                text = event_feedb[0]
+
+                # Determine if message is from subscribed author
+                subs_auth_msg = False
+                if len(event_feedb) > 1 and event_feedb[1] == "blue":
+                    try:
+                        author = event_feedb[0].split("\n\t")[1].split(":")[0]
+                        chan = event_feedb[0].split(": \n\t")[0].split(" ")[-1]
+                        auth_subs = cfg["discord"]["authors_subscribed"].split(",")
+                        auth_subs = [i.split("#")[0].strip() for i in auth_subs]
+
+                        if any(a == author for a in auth_subs):
+                            subs_auth_msg = True
+                    except:
+                        pass
+
+                # Update message consoles
+                if "-MLINE-" in self.widgets:
+                    self.widgets["-MLINE-"].insert(tk.END, text + "\n")
+                    self.widgets["-MLINE-"].see(tk.END)
+
+                if subs_auth_msg and "-MLINEsub-" in self.widgets:
+                    self.widgets["-MLINEsub-"].insert(tk.END, text + "\n")
+                    self.widgets["-MLINEsub-"].see(tk.END)
+
         except queue.Empty:
             pass
+        finally:
+            # Schedule next check
+            self.root.after(100, self.check_events)
+
+    def run(self):
+        """Run the GUI main loop"""
+        self.root.mainloop()
 
 
-def run_client():
-    if len(cfg['discord']['discord_token']) < 50:
-        str_prt = "Discord token not provided, no discord messages will be received. Add user token in config.ini"
-        print(str_prt)
-        time.sleep(3)
-        trade_events.put([str_prt,"", "red"])
-        return
-    alistner.run(cfg['discord']['discord_token'])
+def gui():
+    """Entry point for GUI"""
+    app = DiscordAlertsTraderGUI()
+    app.run()
 
 
-def gui():   
-    client_thread = threading.Thread(target=run_client, daemon=True)
-
-    # start the threads
-    client_thread.start()
-    run_gui()
-
-    # close the GUI window
-    window.close()
-    alistner.close_bot()
-    exit()
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     gui()

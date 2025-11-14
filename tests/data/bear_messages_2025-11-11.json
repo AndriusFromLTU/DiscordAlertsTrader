@@ -1,0 +1,891 @@
+{
+  "fetch_date": "2025-11-13T13:59:51.966664+00:00",
+  "date_range": {
+    "start": "2025-11-11T00:00:00+00:00",
+    "end": "2025-11-11T23:59:59.999999+00:00"
+  },
+  "channel_id": 979906463487103006,
+  "message_count": 44,
+  "messages": [
+    {
+      "id": 1437811795753566350,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T14:30:45.359000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "Daytrade",
+          "description": "Contract:  **QQQ 11/11 623C**\r\n\r\nEntry: **0.84**\r\n\r\nNotes: **​**\r\n\r\n*These are ONLY my opinions, I am NOT a Financial Advisor. Please ALWAYS manage risk according to your risk tolerance, as my entries, trims and exits are according to my risk tolerance. My trade ideas/opinions are for informational/entertainment purposes ONLY*",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437814422033793117,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T14:41:11.513000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "Updates:",
+          "description": "**I knew we were going to have low volume today hence the reason I was trading smaller today. I didn’t think the open was going to be this bad **",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437814937962414142,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T14:43:14.520000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "Updates:",
+          "description": "**adding here mental stop under 501**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437815190144942171,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T14:44:14.645000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "Updates:",
+          "description": "**De risking avg perfect snipe**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437816778439921797,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T14:50:33.324000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "Updates:",
+          "description": "**Time to close the rest losing key support for this setup -31%**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437817835358523462,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T14:54:45.313000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "Daytrade",
+          "description": "Contract:  **IWM 11/11 243C**\r\n\r\nEntry: **0.72**\r\n\r\nNotes: **trying one more setup**\r\n\r\n*These are ONLY my opinions, I am NOT a Financial Advisor. Please ALWAYS manage risk according to your risk tolerance, as my entries, trims and exits are according to my risk tolerance. My trade ideas/opinions are for informational/entertainment purposes ONLY*",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437818392647172207,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T14:56:58.181000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": null,
+          "description": "**Contract:** IWM 11/11 243C\r\n\r\n**I’m trimming here for 51%**\r\n\r\n**Notes:** TY IWM\r\n\r\n*These are ONLY my opinions, I am NOT a Financial Advisor. Please ALWAYS manage risk according to your risk tolerance, as my entries, trims and exits are according to my risk tolerance. My trade ideas/opinions are for informational/entertainment purposes ONLY*",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437818601557070015,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T14:57:47.989000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "Updates:",
+          "description": "**darn you qqq could’ve gotten back in on that 501**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437818741072203817,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T14:58:21.252000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "UPDATE:",
+          "description": "Contract:  **IWM 11/11 243C**\r\n\r\nUp **__80__**%\r\n\r\nNotes: **darn qqq would be green as well**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437823524310876190,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T15:17:21.665000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "LOTTO:",
+          "description": "**Contract:** $QQQ 11/11 618P\r\n\r\n**Entry:** @.91\r\n\r\n**Notes:** ​\r\n\r\n*These are ONLY my opinions, I am NOT a Financial Advisor. Please ALWAYS manage risk according to your risk tolerance, as my entries, trims and exits are according to my risk tolerance. My trade ideas/opinions are for informational/entertainment purposes ONLY*",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437824082132336671,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T15:19:34.660000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": null,
+          "description": "**Contract:** QQQ 11/11 618P\r\n\r\n**I’m trimming here for 24%**\r\n\r\n**Notes:** ​\r\n\r\n*These are ONLY my opinions, I am NOT a Financial Advisor. Please ALWAYS manage risk according to your risk tolerance, as my entries, trims and exits are according to my risk tolerance. My trade ideas/opinions are for informational/entertainment purposes ONLY*",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437825654295891988,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T15:25:49.493000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "Updates:",
+          "description": "**Closing the rest of the puts switching to calls**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437826022283415707,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T15:27:17.228000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "LOTTO:",
+          "description": "**Contract:** $QQQ 11/11 621C\r\n\r\n**Entry:** @0.69\r\n\r\n**Notes:** last trade for me\r\n\r\n*These are ONLY my opinions, I am NOT a Financial Advisor. Please ALWAYS manage risk according to your risk tolerance, as my entries, trims and exits are according to my risk tolerance. My trade ideas/opinions are for informational/entertainment purposes ONLY*",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437827995963490436,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T15:35:07.790000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "Updates:",
+          "description": "**Adding here new avg 0.55**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437829002818748487,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T15:39:07.843000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "Updates:",
+          "description": "**Such aids**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437829631917953124,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T15:41:37.832000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "Updates:",
+          "description": "**De risking avg!**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437829767456886937,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T15:42:10.147000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "Updates:",
+          "description": "**Back in green here**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437835155283906711,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T16:03:34.705000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "Updates:",
+          "description": "**will need a strong push out of this**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437836737073123392,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T16:09:51.833000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "Updates:",
+          "description": "**Well ladies this is why de risking is important. Got to de risk in profit max I saw was 5% but we never got near where I wanted to trim.\n\nCons are just getting premium burn due to low volume personally going to close out the rest -34%**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437837606703464549,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T16:13:19.169000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "Updates:",
+          "description": "**I will get to everyone’s DMs later. Taking my ass back to sleep head is pounding. The sick life sucks 🤒**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437838651026440202,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T16:17:28.155000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "Updates:",
+          "description": "**also before I go the setup is still there as long as we hold that 423 level I personally closed as I’m not trying to wait for this thing to move**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437839649170264116,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T16:21:26.131000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "Updates:",
+          "description": "**Well these she goes this is TRAMA make sure to trim/derisk as theta coming for yall cons are green**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437840385782317267,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T16:24:21.753000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "Updates:",
+          "description": "**there ya go ladies**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437841050503741494,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T16:27:00.235000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "Updates:",
+          "description": "**okay i can go to sleep in peace now. Caught it with another set for 84%. Told yall that setup is still there**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437866187009818755,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T18:06:53.245000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "Updates:",
+          "description": "**Just woke up. Told ya'll that setup was still there**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437866293704396934,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T18:07:18.683000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "Updates:",
+          "description": "**621c up 100% LOL**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437869109378416852,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T18:18:29.992000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "UPDATE:",
+          "description": "Contract:  **IWM 11/11 243C**\r\n\r\nUp **__102__**%\r\n\r\nNotes: **​**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437870625820508180,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T18:24:31.540000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": null,
+          "description": "**Contract:** IWM 11/11 243C\r\n\r\n**I’m trimming here for 121%**\r\n\r\n**Notes:** Taking full profit on these, congrats if you held those QQQ calls over 150% on those I would close those here as well\r\n\r\n*These are ONLY my opinions, I am NOT a Financial Advisor. Please ALWAYS manage risk according to your risk tolerance, as my entries, trims and exits are according to my risk tolerance. My trade ideas/opinions are for informational/entertainment purposes ONLY*",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437875210228334643,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T18:42:44.548000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "Updates:",
+          "description": "**Will possibly play this breakout if we get it**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437876350156406898,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T18:47:16.328000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "Daytrade",
+          "description": "Contract:  **QQQ 11/11 622C**\r\n\r\nEntry: **.74**\r\n\r\nNotes: **lOOKING FOR BREAKOUT**\r\n\r\n*These are ONLY my opinions, I am NOT a Financial Advisor. Please ALWAYS manage risk according to your risk tolerance, as my entries, trims and exits are according to my risk tolerance. My trade ideas/opinions are for informational/entertainment purposes ONLY*",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437877320349384844,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T18:51:07.640000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "UPDATE:",
+          "description": "Contract:  **QQQ 11/11 622C**\r\n\r\nUp **__10__**%\r\n\r\nNotes: **​**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437877800509116586,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T18:53:02.119000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": null,
+          "description": "**Contract:** QQQ 11/11 622C\r\n\r\n**I’m trimming here for 25%**\r\n\r\n**Notes:** ​\r\n\r\n*These are ONLY my opinions, I am NOT a Financial Advisor. Please ALWAYS manage risk according to your risk tolerance, as my entries, trims and exits are according to my risk tolerance. My trade ideas/opinions are for informational/entertainment purposes ONLY*",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437878475384946788,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T18:55:43.022000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "Updates:",
+          "description": "**Back at trim level on QQQ if you missed it**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437878756499783740,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T18:56:50.045000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "Updates:",
+          "description": "**Break here I'll look to take last trims at 622**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437879240795095081,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T18:58:45.510000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "UPDATE:",
+          "description": "Contract:  **QQQ 11/11 622C**\r\n\r\nUp **__45__**%\r\n\r\nNotes: **​**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437879614180692119,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T19:00:14.532000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "UPDATE:",
+          "description": "Contract:  **QQQ 11/11 622C**\r\n\r\nUp **__Runners left as this is my last 15, remaning aiming for 622__**%\r\n\r\nNotes: **​**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437879936219218142,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T19:01:31.312000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "Updates:",
+          "description": "**Instant rejection off that 15m lol literally a perfect trim into runners from that**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437888580805591130,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T19:35:52.342000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "Updates:",
+          "description": "**I'm supposed to be done trading lol\n\nBut\n\nI grabbed IWM 11/11 245P @.64 Lotto size**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437890096773857341,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T19:41:53.777000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "UPDATE:",
+          "description": "Contract:  **IWM 11/11 245P**\r\n\r\nUp **__10__**%\r\n\r\nNotes: **​**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437890446373159146,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T19:43:17.128000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "UPDATE:",
+          "description": "Contract:  **IWM 11/11 245P**\r\n\r\nUp **__17__**%\r\n\r\nNotes: **This is bottom of the band if you need to trim**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437890717551824976,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T19:44:21.782000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": null,
+          "description": "**Contract:** IWM 11/11 245P\r\n\r\n**I’m trimming here for 21%**\r\n\r\n**Notes:** ​\r\n\r\n*These are ONLY my opinions, I am NOT a Financial Advisor. Please ALWAYS manage risk according to your risk tolerance, as my entries, trims and exits are according to my risk tolerance. My trade ideas/opinions are for informational/entertainment purposes ONLY*",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437891240166297732,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T19:46:26.383000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "UPDATE:",
+          "description": "Contract:  **IWM 11/11 245P**\r\n\r\nUp **__35__**%\r\n\r\nNotes: **​**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437892058986844262,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T19:49:41.605000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "Updates:",
+          "description": "**Stopped out the rest. Well I hope everyone is ended the day green 🤘🏽**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    },
+    {
+      "id": 1437902554750255287,
+      "author": {
+        "name": "Bear's Bot",
+        "discriminator": "5893",
+        "id": 981622317056679948,
+        "bot": true
+      },
+      "content": "<@&983210152759005245>",
+      "created_at": "2025-11-11T20:31:23.990000+00:00",
+      "channel_id": 979906463487103006,
+      "embeds": [
+        {
+          "title": "Updates:",
+          "description": "**Well thats rude IWM this is my PT i wanted. Cons up over 70%**",
+          "author": null,
+          "fields": []
+        }
+      ]
+    }
+  ]
+}

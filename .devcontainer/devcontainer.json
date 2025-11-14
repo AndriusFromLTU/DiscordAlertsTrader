@@ -1,0 +1,65 @@
+{
+    "name": "DiscordAlertsTrader Dev Container",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": ".."
+    },
+    // Configure tool-specific properties
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "python.defaultInterpreterPath": "/usr/local/bin/python",
+                "python.linting.enabled": true,
+                "python.linting.pylintEnabled": true,
+                "python.formatting.provider": "black",
+                "python.testing.pytestEnabled": true,
+                "editor.formatOnSave": true,
+                "terminal.integrated.shell.linux": "/bin/bash"
+            },
+            "extensions": [
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "ms-python.black-formatter",
+                "ms-python.pylint",
+                "ms-python.debugpy",
+                "njpwerner.autodocstring",
+                "streetsidesoftware.code-spell-checker",
+                "github.copilot",
+                "eamodio.gitlens"
+            ]
+        }
+    },
+    // Forward GUI for Qt applications
+    "forwardPorts": [
+        6000
+    ],
+    "portsAttributes": {
+        "6000": {
+            "label": "X11 Display"
+        }
+    },
+    // Use 'postCreateCommand' to run commands after the container is created
+    "postCreateCommand": "pip install --upgrade pip && pip install -r requirements.txt && pip install -e .",
+    // Features to add to the container
+    "features": {
+        "ghcr.io/devcontainers/features/python:1": {
+            "version": "3.11"
+        },
+        "ghcr.io/devcontainers/features/git:1": {}
+    },
+    // Set environment variables
+    "remoteEnv": {
+        "PYTHONPATH": "${containerWorkspaceFolder}",
+        "DISPLAY": ":0"
+    },
+    // Run as non-root user
+    "remoteUser": "vscode",
+    // Mount the host's X11 socket for GUI support (macOS/Linux)
+    "mounts": [
+        "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind"
+    ],
+    // Container run arguments
+    "runArgs": [
+        "--network=host"
+    ]
+}

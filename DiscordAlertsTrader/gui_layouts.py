@@ -2,496 +2,917 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Apr 27 11:54:36 2021
+Migrated to tkinter/ttkbootstrap on Nov 13 2025
 
 @author: adonay
 """
 
-import PySimpleGUIQt as sg
-from . import gui_generator as gg
+import tkinter as tk
+from tkinter import scrolledtext, ttk
+from tkinter.ttk import Treeview
 
+import ttkbootstrap as ttk_boot
+from ttkbootstrap.constants import *
+
+from . import gui_generator as gg
 
 tip = "coma separed patterns, e.g. string1,string2"
 tlp_date = "Date can be:\n-a date mm/dd/yyyy, mm/dd\n-a period: today, yesterday, week, biweek, month, mtd, ytd"
 
-def layout_console(ttl='Discord messages from subscribed channels', 
-                   key='-MLINE-__WRITE ONLY__'):
-    layout = [[sg.Text(ttl, size=(100,1))],
-              [sg.Multiline(size=(1200,None), key=key, autoscroll=True, enable_events=False),sg.Stretch()],]
-    return layout, key
 
-def trigger_alerts_layout():
-    tp_chan = "Select portfolios to trigger alert.\n'user' for your portfolio only. Will bypass false do_BTO and do_BTC and make the trade \n" +\
-                "'analysts' for the alerts tracker,\n'all' for both"
-    tp_trig = "Click portfolio row number to prefill the STC alert. Alerts can look like\n" +\
-                "BTO: Author, BTO 1 AAA 115C 05/30 @2.5 PT 3.5TS30% PT2 4 SL TS40% -> '%' for percentage, TS for Trailing Stop\n" +\
-                "STC: Author, STC 1 AAA 115C 05/30 @3\n" +\
-                "Exit Update: Author, exit update AAA 115C 05/30 PT 80% SL 2\n" +\
-                "Exit Update: Author, exit update AAA 115C 05/30 isopen:no\n"  +\
-                "Exit Update: Author, exit update AAA 115C 05/30 cancelAVG\n"  +\
-                "Get quotes: Author, BTO 1 AAA 115C 05/30 @m" 
-    lay = [[
-           sg.Text('to portfolio:', tooltip=tp_chan),
-           sg.Combo(['both', 'user', 'analysts'], default_value='analysts', key="_chan_trigg_",tooltip=tp_chan, readonly=True, size=(15,1)),
-           
-           sg.Button('▲', key='-toggle',   enable_events=True, 
-                                 tooltip='Show/hide change alert action'),
-            sg.Input(default_text="Author, STC 1 AAA 115C 05/30 @2.5 [click port row number to prefill]",
-                    size= (100,1), key="-subm-msg",
-                    tooltip=tp_trig),
-           sg.Button("Trigger alert", key="-subm-alert", 
-                     tooltip="Will generate alert in user or/and analysts portfolio, useful to close or open a position", size= (20,1)),
-           sg.Stretch()], 
-           [sg.Text('Change alert to:', key='-alert_to-', tooltip="Change  current alert in tigger alert", visible=True),
-            sg.Button("BTO", key='-alert_BTO', size=(10,1), tooltip="Once clicked portfolio row change prefilled STC to BTO", visible=True),
-            sg.Button("STC", key='-alert_STC', size=(10,1), tooltip="Once clicked portfolio row change prefilled to STC", visible=True),
-            sg.Button("STO", key='-alert_STO', size=(10,1), tooltip="Once clicked portfolio row change prefilled STC to BTO", visible=True),
-            sg.Button("BTC", key='-alert_BTC', size=(10,1), tooltip="Once clicked portfolio row change prefilled to STC", visible=True),
-            sg.Button("ExitUpdate", key='-alert_exitupdate', size=(20,1), tooltip="Once clicked portfolio row change prefilled STC to exit update", visible=True),
-            sg.Button("Get quotes", key='-alert_quotes', size=(20,1), tooltip="get quotes from alerts in trigger box. In alert pass prices as @m to get market price", visible=True),
-            sg.Button("Plot quotes", key='-alert_plot', size=(20,1), tooltip="plot daily quotes from alerts in trigger box", visible=True),
-            sg.Button("author: me", key='-alert_tome', size=(20,1), tooltip="change author in alert to 'me'", visible=True),
-            sg.Button("author: me_short", key='-alert_tomeshort', size=(30,1), tooltip="change author in alert to 'me_short'", visible=True),
-            sg.Button("3 exits 1 SL", key='-alert_exits', size=(20,1), tooltip="change exits to PT1 20% PT2 40% PT3 60% SL 50%'", visible=True),
-            sg.Stretch()
-           ]
-           ]
-    return lay
+class LayoutBuilder:
+    """Helper class to build tkinter layouts"""
 
-def layout_portfolio(data_n_headers, font_body, font_header):
-    if data_n_headers[0] == []: 
-        values = [""*21 ]
+    def __init__(self, parent):
+        self.parent = parent
+        self.widgets = {}
+
+    def add_widget(self, key, widget):
+        """Store widget reference by key for later access"""
+        self.widgets[key] = widget
+        return widget
+
+
+def create_console_frame(
+    parent, ttl="Discord messages from subscribed channels", key="-MLINE-__WRITE ONLY__"
+):
+    """Create console text display"""
+    frame = ttk.Frame(parent)
+
+    label = ttk.Label(frame, text=ttl)
+    label.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
+
+    text_widget = scrolledtext.ScrolledText(frame, width=120, height=20, wrap=tk.WORD)
+    text_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=True, padx=5, pady=5)
+
+    return frame, text_widget, key
+
+
+def create_trigger_alerts_frame(parent):
+    """Create trigger alerts controls"""
+    tp_chan = (
+        "Select portfolios to trigger alert.\n'user' for your portfolio only. Will bypass false do_BTO and do_BTC and make the trade \n"
+        + "'analysts' for the alerts tracker,\n'all' for both"
+    )
+    tp_trig = (
+        "Click portfolio row number to prefill the STC alert. Alerts can look like\n"
+        + "BTO: Author, BTO 1 AAA 115C 05/30 @2.5 PT 3.5TS30% PT2 4 SL TS40% -> '%' for percentage, TS for Trailing Stop\n"
+        + "STC: Author, STC 1 AAA 115C 05/30 @3\n"
+        + "Exit Update: Author, exit update AAA 115C 05/30 PT 80% SL 2\n"
+        + "Exit Update: Author, exit update AAA 115C 05/30 isopen:no\n"
+        + "Exit Update: Author, exit update AAA 115C 05/30 cancelAVG\n"
+        + "Get quotes: Author, BTO 1 AAA 115C 05/30 @m"
+    )
+
+    frame = ttk.Frame(parent)
+    widgets = {}
+
+    # First row - main controls
+    row1 = ttk.Frame(frame)
+    row1.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
+
+    ttk.Label(row1, text="to portfolio:").pack(side=tk.LEFT, padx=2)
+
+    widgets["_chan_trigg_"] = ttk.Combobox(
+        row1, values=["both", "user", "analysts"], state="readonly", width=15
+    )
+    widgets["_chan_trigg_"].set("analysts")
+    widgets["_chan_trigg_"].pack(side=tk.LEFT, padx=2)
+
+    widgets["-toggle"] = ttk.Button(row1, text="▲", width=3)
+    widgets["-toggle"].pack(side=tk.LEFT, padx=2)
+
+    widgets["-subm-msg"] = ttk.Entry(row1, width=80)
+    widgets["-subm-msg"].insert(
+        0, "Author, STC 1 AAA 115C 05/30 @2.5 [click port row number to prefill]"
+    )
+    widgets["-subm-msg"].pack(side=tk.LEFT, padx=2, fill=tk.X, expand=True)
+
+    widgets["-subm-alert"] = ttk.Button(row1, text="Trigger alert", width=20)
+    widgets["-subm-alert"].pack(side=tk.LEFT, padx=2)
+
+    # Second row - alert action buttons
+    row2 = ttk.Frame(frame)
+    row2.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
+
+    widgets["-alert_to-"] = ttk.Label(row2, text="Change alert to:")
+    widgets["-alert_to-"].pack(side=tk.LEFT, padx=2)
+
+    button_configs = [
+        ("-alert_BTO", "BTO", 10),
+        ("-alert_STC", "STC", 10),
+        ("-alert_STO", "STO", 10),
+        ("-alert_BTC", "BTC", 10),
+        ("-alert_exitupdate", "ExitUpdate", 15),
+        ("-alert_quotes", "Get quotes", 15),
+        ("-alert_plot", "Plot quotes", 15),
+        ("-alert_tome", "author: me", 15),
+        ("-alert_tomeshort", "author: me_short", 20),
+        ("-alert_exits", "3 exits 1 SL", 15),
+    ]
+
+    for key, text, width in button_configs:
+        widgets[key] = ttk.Button(row2, text=text, width=width)
+        widgets[key].pack(side=tk.LEFT, padx=2)
+
+    # Set initial visibility
+    widgets["-alert_to-"].pack_forget()
+    for key, _, _ in button_configs:
+        widgets[key].pack_forget()
+
+    return frame, widgets
+
+
+def create_portfolio_frame(parent, data_n_headers, font_body, font_header):
+    """Create portfolio display with filters"""
+    frame = ttk.Frame(parent)
+    widgets = {}
+
+    if data_n_headers[0] == []:
+        values = []
     else:
-        values=data_n_headers[0]
-    
-    layout = [
-         [sg.Column([[
-            sg.Text('Include:  Authors: ', auto_size_text=True,tooltip=tip), sg.Input(key=f'port_filt_author',tooltip=tip),
-            sg.Text('Date from: ', tooltip=tlp_date),sg.Combo(['today', 'week', 'month'], default_value='week',
-                                                              key=f'port_filt_date_frm', tooltip=tlp_date),
-            sg.Text(' To: ', tooltip=tlp_date), sg.Combo(['today', 'week', 'month'], default_value='today',
-                                                         key=f'port_filt_date_to', tooltip=tlp_date),
-            sg.Text(' Symbols: ', tooltip=tip), sg.Input(key=f'port_filt_sym', tooltip=tip),
-            sg.Text(' Channels: ',tooltip=tip), sg.Input(key=f'port_filt_chn',tooltip=tip)
-            ],                                        
-            [sg.Text("Exclude: |"),
-            sg.Checkbox("Closed", key="-port-Closed", enable_events=True),
-            sg.Checkbox("Open", key="-port-Open", enable_events=True),
-            sg.Checkbox("Canceled", key="-port-Canceled", default=True, enable_events=True),
-            sg.Checkbox("Rejected", key="-port-Rejected", default=True, enable_events=True),
-            sg.Checkbox("Neg PnL", key="-port-NegPnL", enable_events=True),
-            sg.Checkbox("Pos PnL", key="-port-PosPnL", enable_events=True),
-            sg.Checkbox("Live PnL", key="-port-live PnL", enable_events=True),
-            sg.Checkbox("Stocks", key="-port-stocks", default=True, enable_events=True),
-            sg.Checkbox("Options", key="-port-options", enable_events=True),
-            sg.Checkbox("BTO", key="-port-bto", enable_events=True),
-            sg.Checkbox("STO", key="-port-sto", enable_events=True),
-            sg.Text('| Authors: ', auto_size_text=True,tooltip=tip), sg.Input(key=f'port_exc_author', tooltip=tip),
-            sg.Text('Channels: ', auto_size_text=True,tooltip=tip), sg.Input(key=f'port_exc_chn',tooltip=tip),
-            ],
-            [sg.ReadButton("Update", button_color=('white', 'black'),bind_return_key=True, key="_upd-portfolio_")]])],
-         [sg.Column([[sg.Table(values=values,
-                        headings=data_n_headers[1],
-                        display_row_numbers=True,
-                        auto_size_columns=True,
-                        header_font=font_header,
-                        text_color='black',
-                        font=font_body,
-                        justification='left',
-                        alternating_row_color='grey',
-                        # num_rows=30, #len(data_n_headers[0]),
-                        enable_events=True,
-                        key='_portfolio_'), sg.Stretch()]])]
-         ]
-    return layout
+        values = data_n_headers[0]
+
+    # Filter row 1 - Include filters
+    filter_frame1 = ttk.Frame(frame)
+    filter_frame1.pack(side=tk.TOP, fill=tk.X, padx=5, pady=2)
+
+    ttk.Label(filter_frame1, text="Include:  Authors:").pack(side=tk.LEFT, padx=2)
+    widgets["port_filt_author"] = ttk.Entry(filter_frame1, width=15)
+    widgets["port_filt_author"].pack(side=tk.LEFT, padx=2)
+
+    ttk.Label(filter_frame1, text="Date from:").pack(side=tk.LEFT, padx=2)
+    widgets["port_filt_date_frm"] = ttk.Combobox(
+        filter_frame1, values=["today", "week", "month"], state="readonly", width=10
+    )
+    widgets["port_filt_date_frm"].set("week")
+    widgets["port_filt_date_frm"].pack(side=tk.LEFT, padx=2)
+
+    ttk.Label(filter_frame1, text="To:").pack(side=tk.LEFT, padx=2)
+    widgets["port_filt_date_to"] = ttk.Combobox(
+        filter_frame1, values=["today", "week", "month"], state="readonly", width=10
+    )
+    widgets["port_filt_date_to"].set("today")
+    widgets["port_filt_date_to"].pack(side=tk.LEFT, padx=2)
+
+    ttk.Label(filter_frame1, text="Symbols:").pack(side=tk.LEFT, padx=2)
+    widgets["port_filt_sym"] = ttk.Entry(filter_frame1, width=15)
+    widgets["port_filt_sym"].pack(side=tk.LEFT, padx=2)
+
+    ttk.Label(filter_frame1, text="Channels:").pack(side=tk.LEFT, padx=2)
+    widgets["port_filt_chn"] = ttk.Entry(filter_frame1, width=15)
+    widgets["port_filt_chn"].pack(side=tk.LEFT, padx=2)
+
+    # Filter row 2 - Exclude checkboxes
+    filter_frame2 = ttk.Frame(frame)
+    filter_frame2.pack(side=tk.TOP, fill=tk.X, padx=5, pady=2)
+
+    ttk.Label(filter_frame2, text="Exclude: |").pack(side=tk.LEFT, padx=2)
+
+    checkbox_configs = [
+        ("-port-Closed", "Closed", False),
+        ("-port-Open", "Open", False),
+        ("-port-Canceled", "Canceled", True),
+        ("-port-Rejected", "Rejected", True),
+        ("-port-NegPnL", "Neg PnL", False),
+        ("-port-PosPnL", "Pos PnL", False),
+        ("-port-live PnL", "Live PnL", False),
+        ("-port-stocks", "Stocks", True),
+        ("-port-options", "Options", False),
+        ("-port-bto", "BTO", False),
+        ("-port-sto", "STO", False),
+    ]
+
+    for key, text, default in checkbox_configs:
+        var = tk.BooleanVar(value=default)
+        widgets[key] = ttk.Checkbutton(filter_frame2, text=text, variable=var)
+        widgets[key].var = var
+        widgets[key].pack(side=tk.LEFT, padx=2)
+
+    ttk.Label(filter_frame2, text="| Authors:").pack(side=tk.LEFT, padx=2)
+    widgets["port_exc_author"] = ttk.Entry(filter_frame2, width=15)
+    widgets["port_exc_author"].pack(side=tk.LEFT, padx=2)
+
+    ttk.Label(filter_frame2, text="Channels:").pack(side=tk.LEFT, padx=2)
+    widgets["port_exc_chn"] = ttk.Entry(filter_frame2, width=15)
+    widgets["port_exc_chn"].pack(side=tk.LEFT, padx=2)
+
+    # Update button
+    update_frame = ttk.Frame(frame)
+    update_frame.pack(side=tk.TOP, fill=tk.X, padx=5, pady=2)
+
+    widgets["_upd-portfolio_"] = ttk.Button(
+        update_frame, text="Update", bootstyle="dark"
+    )
+    widgets["_upd-portfolio_"].pack(side=tk.LEFT, padx=2)
+
+    # Table
+    table_frame = ttk.Frame(frame)
+    table_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True, padx=5, pady=5)
+
+    # Create treeview with scrollbars
+    tree_scroll_y = ttk.Scrollbar(table_frame, orient=tk.VERTICAL)
+    tree_scroll_x = ttk.Scrollbar(table_frame, orient=tk.HORIZONTAL)
+
+    widgets["_portfolio_"] = Treeview(
+        table_frame,
+        columns=data_n_headers[1],
+        show="tree headings",
+        yscrollcommand=tree_scroll_y.set,
+        xscrollcommand=tree_scroll_x.set,
+    )
+
+    tree_scroll_y.config(command=widgets["_portfolio_"].yview)
+    tree_scroll_x.config(command=widgets["_portfolio_"].xview)
+
+    tree_scroll_y.pack(side=tk.RIGHT, fill=tk.Y)
+    tree_scroll_x.pack(side=tk.BOTTOM, fill=tk.X)
+    widgets["_portfolio_"].pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+    # Configure columns
+    widgets["_portfolio_"].column("#0", width=50, minwidth=50)  # Row number column
+    for idx, heading in enumerate(data_n_headers[1]):
+        widgets["_portfolio_"].heading(f"#{idx + 1}", text=heading)
+        widgets["_portfolio_"].column(f"#{idx + 1}", width=100, minwidth=50)
+
+    # Insert data
+    for row_idx, row_data in enumerate(values):
+        tag = "evenrow" if row_idx % 2 == 0 else "oddrow"
+        widgets["_portfolio_"].insert(
+            "", tk.END, text=str(row_idx + 1), values=row_data, tags=(tag,)
+        )
+
+    # Configure alternating row colors
+    widgets["_portfolio_"].tag_configure("oddrow", background="white")
+    widgets["_portfolio_"].tag_configure("evenrow", background="lightgray")
+
+    return frame, widgets
 
 
-def layout_traders(data_n_headers, font_body, font_header):
-    
-    if data_n_headers[0] == []: 
-        values = [""*21 ]
+# Continue with remaining functions in next part...
+
+
+def create_traders_frame(parent, data_n_headers, font_body, font_header):
+    """Create analysts portfolio/traders display with filters"""
+    frame = ttk.Frame(parent)
+    widgets = {}
+
+    if data_n_headers[0] == []:
+        values = []
     else:
-        values=data_n_headers[0]
-    
-    layout = [[
-        sg.Column([
-            [
-            sg.Text('Include:  Authors: ', auto_size_text=True,tooltip=tip), sg.Input(key=f'track_filt_author',tooltip=tip),
-            sg.Text('Date from: ', tooltip=tlp_date), sg.Combo(['today', 'week', 'month'], default_value='week',
-                                                               key=f'track_filt_date_frm', tooltip=tlp_date),
-            sg.Text(' To: ', tooltip=tlp_date), sg.Combo(['today', 'week', 'month'], default_value='',
-                                                         key=f'track_filt_date_to', tooltip=tlp_date),
-            sg.Text(' Symbols: ',tooltip=tip), sg.Input(key=f'track_filt_sym',tooltip=tip),
-            sg.Text(' Channels: ',tooltip=tip), sg.Input(key=f'track_filt_chn',tooltip=tip),
-            sg.Text(' DTE: min', tooltip="Days To Expiration min"), 
-            sg.Input(key=f'track_dte_min', tooltip="Days To Expiration min"),
-            sg.Text(' max', tooltip="Days To Expiration max"), 
-            sg.Input(key=f'track_dte_max', tooltip="Days To Expiration max"),
-            ],[ 
-            sg.Text("Exclude: |"),
-            sg.Checkbox("Closed", key="-track-Closed", enable_events=True),
-            sg.Checkbox("Open", key="-track-Open", enable_events=True),
-            sg.Checkbox("Neg PnL", key="-track-NegPnL", enable_events=True),
-            sg.Checkbox("Pos PnL", key="-track-PosPnL", enable_events=True),
-            sg.Checkbox("Live PnL", key="-track-live PnL", enable_events=True), 
-            sg.Checkbox("Stocks", key="-track-stocks", default=True, enable_events=True),
-            sg.Checkbox("Options", key="-track-options", enable_events=True),
-            sg.Checkbox("BTO", key="-track-bto", enable_events=True),
-            sg.Checkbox("STO", key="-track-sto", enable_events=True),
-            sg.Text('| Authors: ', auto_size_text=True,tooltip=tip), sg.Input(key=f'track_exc_author', tooltip=tip),
-            sg.Text('Symbols: ', auto_size_text=True,tooltip=tip), sg.Input(key=f'track_exc_sym',tooltip=tip),
-            sg.Text('Channels: ', auto_size_text=True,tooltip=tip), sg.Input(key=f'track_exc_chn',tooltip=tip),
-            ],[sg.ReadButton("Update", button_color=('white', 'black'),bind_return_key=True, key="_upd-track_")]
-            ])],
-         [sg.Column([
-            [
-            sg.Table(values=values,
-                headings=data_n_headers[1],
-                display_row_numbers=True,
-                auto_size_columns=True,
-                header_font=font_header,
-                text_color='black',
-                font=font_body,
-                justification='left',
-                alternating_row_color='grey',
-                enable_events=True,
-                # num_rows=30, #len(data_n_headers[0]),
-                key='_track_'), sg.Stretch()]])]
-         ]
-    return layout
+        values = data_n_headers[0]
+
+    # Filter row 1 - Include filters
+    filter_frame1 = ttk.Frame(frame)
+    filter_frame1.pack(side=tk.TOP, fill=tk.X, padx=5, pady=2)
+
+    ttk.Label(filter_frame1, text="Include:  Authors:").pack(side=tk.LEFT, padx=2)
+    widgets["track_filt_author"] = ttk.Entry(filter_frame1, width=12)
+    widgets["track_filt_author"].pack(side=tk.LEFT, padx=2)
+
+    ttk.Label(filter_frame1, text="Date from:").pack(side=tk.LEFT, padx=2)
+    widgets["track_filt_date_frm"] = ttk.Combobox(
+        filter_frame1, values=["today", "week", "month"], state="readonly", width=10
+    )
+    widgets["track_filt_date_frm"].set("week")
+    widgets["track_filt_date_frm"].pack(side=tk.LEFT, padx=2)
+
+    ttk.Label(filter_frame1, text="To:").pack(side=tk.LEFT, padx=2)
+    widgets["track_filt_date_to"] = ttk.Combobox(
+        filter_frame1, values=["today", "week", "month"], state="readonly", width=10
+    )
+    widgets["track_filt_date_to"].set("")
+    widgets["track_filt_date_to"].pack(side=tk.LEFT, padx=2)
+
+    ttk.Label(filter_frame1, text="Symbols:").pack(side=tk.LEFT, padx=2)
+    widgets["track_filt_sym"] = ttk.Entry(filter_frame1, width=12)
+    widgets["track_filt_sym"].pack(side=tk.LEFT, padx=2)
+
+    ttk.Label(filter_frame1, text="Channels:").pack(side=tk.LEFT, padx=2)
+    widgets["track_filt_chn"] = ttk.Entry(filter_frame1, width=12)
+    widgets["track_filt_chn"].pack(side=tk.LEFT, padx=2)
+
+    ttk.Label(filter_frame1, text="DTE: min").pack(side=tk.LEFT, padx=2)
+    widgets["track_dte_min"] = ttk.Entry(filter_frame1, width=8)
+    widgets["track_dte_min"].pack(side=tk.LEFT, padx=2)
+
+    ttk.Label(filter_frame1, text="max").pack(side=tk.LEFT, padx=2)
+    widgets["track_dte_max"] = ttk.Entry(filter_frame1, width=8)
+    widgets["track_dte_max"].pack(side=tk.LEFT, padx=2)
+
+    # Filter row 2 - Exclude checkboxes
+    filter_frame2 = ttk.Frame(frame)
+    filter_frame2.pack(side=tk.TOP, fill=tk.X, padx=5, pady=2)
+
+    ttk.Label(filter_frame2, text="Exclude: |").pack(side=tk.LEFT, padx=2)
+
+    checkbox_configs = [
+        ("-track-Closed", "Closed", False),
+        ("-track-Open", "Open", False),
+        ("-track-NegPnL", "Neg PnL", False),
+        ("-track-PosPnL", "Pos PnL", False),
+        ("-track-live PnL", "Live PnL", False),
+        ("-track-stocks", "Stocks", True),
+        ("-track-options", "Options", False),
+        ("-track-bto", "BTO", False),
+        ("-track-sto", "STO", False),
+    ]
+
+    for key, text, default in checkbox_configs:
+        var = tk.BooleanVar(value=default)
+        widgets[key] = ttk.Checkbutton(filter_frame2, text=text, variable=var)
+        widgets[key].var = var
+        widgets[key].pack(side=tk.LEFT, padx=2)
+
+    ttk.Label(filter_frame2, text="| Authors:").pack(side=tk.LEFT, padx=2)
+    widgets["track_exc_author"] = ttk.Entry(filter_frame2, width=12)
+    widgets["track_exc_author"].pack(side=tk.LEFT, padx=2)
+
+    ttk.Label(filter_frame2, text="Symbols:").pack(side=tk.LEFT, padx=2)
+    widgets["track_exc_sym"] = ttk.Entry(filter_frame2, width=12)
+    widgets["track_exc_sym"].pack(side=tk.LEFT, padx=2)
+
+    ttk.Label(filter_frame2, text="Channels:").pack(side=tk.LEFT, padx=2)
+    widgets["track_exc_chn"] = ttk.Entry(filter_frame2, width=12)
+    widgets["track_exc_chn"].pack(side=tk.LEFT, padx=2)
+
+    # Update button
+    update_frame = ttk.Frame(frame)
+    update_frame.pack(side=tk.TOP, fill=tk.X, padx=5, pady=2)
+
+    widgets["_upd-track_"] = ttk.Button(update_frame, text="Update", bootstyle="dark")
+    widgets["_upd-track_"].pack(side=tk.LEFT, padx=2)
+
+    # Table
+    table_frame = ttk.Frame(frame)
+    table_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True, padx=5, pady=5)
+
+    tree_scroll_y = ttk.Scrollbar(table_frame, orient=tk.VERTICAL)
+    tree_scroll_x = ttk.Scrollbar(table_frame, orient=tk.HORIZONTAL)
+
+    widgets["_track_"] = Treeview(
+        table_frame,
+        columns=data_n_headers[1],
+        show="tree headings",
+        yscrollcommand=tree_scroll_y.set,
+        xscrollcommand=tree_scroll_x.set,
+    )
+
+    tree_scroll_y.config(command=widgets["_track_"].yview)
+    tree_scroll_x.config(command=widgets["_track_"].xview)
+
+    tree_scroll_y.pack(side=tk.RIGHT, fill=tk.Y)
+    tree_scroll_x.pack(side=tk.BOTTOM, fill=tk.X)
+    widgets["_track_"].pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+    # Configure columns
+    widgets["_track_"].column("#0", width=50, minwidth=50)
+    for idx, heading in enumerate(data_n_headers[1]):
+        widgets["_track_"].heading(f"#{idx + 1}", text=heading)
+        widgets["_track_"].column(f"#{idx + 1}", width=100, minwidth=50)
+
+    # Insert data
+    for row_idx, row_data in enumerate(values):
+        tag = "evenrow" if row_idx % 2 == 0 else "oddrow"
+        widgets["_track_"].insert(
+            "", tk.END, text=str(row_idx + 1), values=row_data, tags=(tag,)
+        )
+
+    widgets["_track_"].tag_configure("oddrow", background="white")
+    widgets["_track_"].tag_configure("evenrow", background="lightgray")
+
+    return frame, widgets
 
 
-def layout_stats(data_n_headers, font_body, font_header):
-    
-    if data_n_headers[0] == []: 
-        values = [""*21 ]
+def create_stats_frame(parent, data_n_headers, font_body, font_header):
+    """Create statistics display with filters"""
+    frame = ttk.Frame(parent)
+    widgets = {}
+
+    if data_n_headers[0] == []:
+        values = []
     else:
-        values=data_n_headers[0]
-    
-    layout = [
-        [sg.Column([[sg.Text('Include:  Authors: ', auto_size_text=True, tooltip=tip), sg.Input(key=f'stat_filt_author', tooltip=tip),
-                     sg.Text('Date from:', tooltip=tlp_date), 
-                     sg.Input(key=f'stat_filt_date_frm', default_text='week', tooltip=tlp_date),
-                     sg.Text(' To:', size=(5, 1), tooltip=tlp_date), 
-                     sg.Input(key=f'stat_filt_date_to', tooltip=tlp_date),
-                     sg.Text(' Symbols:'), sg.Input(key=f'stat_filt_sym', tooltip=tip),
-                     sg.Text(' Max $:', tooltip="calculate stats limiting trades to max $"), 
-                     sg.Input(key=f'stat_max_trade_val', tooltip="calculate stats limiting trades to max $ amount"),
-                     sg.Text(' Max quantity:', tooltip="calculate stats limiting trades to max quantity"), 
-                     sg.Input(key=f'stat_max_qty', tooltip="calculate stats limiting trades to max quantity"),
-                     sg.Text(' DTE: min', tooltip="Days To Expiration min"), 
-                     sg.Input(key=f'stat_dte_min', tooltip="Days To Expiration min"),
-                     sg.Text(' max', tooltip="Days To Expiration max"), 
-                     sg.Input(key=f'stat_dte_max', tooltip="Days To Expiration max"),
-                     
-                     ],
-                     [sg.Text("Exclude: "),
-                      sg.Checkbox("Neg PnL", key="-stat-NegPnL", enable_events=True),
-                      sg.Checkbox("Pos PnL", key="-stat-PosPnL", enable_events=True),                  
-                      sg.Checkbox("Stocks", key="-stat-stocks", default=True, enable_events=True),
-                      sg.Checkbox("Options", key="-stat-options", enable_events=True),
-                      sg.Checkbox("BTO", key="-stat-bto", enable_events=True),
-                      sg.Checkbox("STO", key="-stat-sto", enable_events=True),
-                      sg.Text('| Authors: ', auto_size_text=True,tooltip=tip), sg.Input(key=f'stat_exc_author', tooltip=tip),
-                      sg.Text('Symbols: ', auto_size_text=True,tooltip=tip), sg.Input(key=f'stat_exc_sym',tooltip=tip),
-                      sg.Text('Channels: ', auto_size_text=True,tooltip=tip), sg.Input(key=f'stat_exc_chn',tooltip=tip),
-                      ],
-                     [sg.ReadButton("Update", button_color=('white', 'black'),bind_return_key=True, key="_upd-stat_")],
-                     [sg.Text("PnL-actual = PnL from prices at the moment of alerted trade (as opposed to the prices claimed in the alert) \n" + \
-                         "diff = difference between actual and alerted, high BTO and low STC diffs is bad, alerts are delayed"
-                         )]])
-                    ],
-         [sg.Column([[sg.Table(values=values,
-                        headings=data_n_headers[1],
-                        display_row_numbers=True,
-                        auto_size_columns=True,
-                        header_font=font_header,
-                        text_color='black',
-                        font=font_body,
-                        justification='left',
-                        alternating_row_color='grey',
-                        # num_rows=30, #len(data_n_headers[0]),
-                        key='_stat_'), sg.Stretch()]])]
-         ]
-    return layout
+        values = data_n_headers[0]
 
-def layout_chan_msg(chn, data_n_headers, font_body, font_header):    
-    # Handle empy chan history
-    if data_n_headers[0] == []: 
-        values = [[""*len(data_n_headers[1])] ]
+    # Filter row 1
+    filter_frame1 = ttk.Frame(frame)
+    filter_frame1.pack(side=tk.TOP, fill=tk.X, padx=5, pady=2)
+
+    ttk.Label(filter_frame1, text="Include:  Authors:").pack(side=tk.LEFT, padx=2)
+    widgets["stat_filt_author"] = ttk.Entry(filter_frame1, width=12)
+    widgets["stat_filt_author"].pack(side=tk.LEFT, padx=2)
+
+    ttk.Label(filter_frame1, text="Date from:").pack(side=tk.LEFT, padx=2)
+    widgets["stat_filt_date_frm"] = ttk.Entry(filter_frame1, width=10)
+    widgets["stat_filt_date_frm"].insert(0, "week")
+    widgets["stat_filt_date_frm"].pack(side=tk.LEFT, padx=2)
+
+    ttk.Label(filter_frame1, text="To:").pack(side=tk.LEFT, padx=2)
+    widgets["stat_filt_date_to"] = ttk.Entry(filter_frame1, width=10)
+    widgets["stat_filt_date_to"].pack(side=tk.LEFT, padx=2)
+
+    ttk.Label(filter_frame1, text="Symbols:").pack(side=tk.LEFT, padx=2)
+    widgets["stat_filt_sym"] = ttk.Entry(filter_frame1, width=12)
+    widgets["stat_filt_sym"].pack(side=tk.LEFT, padx=2)
+
+    ttk.Label(filter_frame1, text="Max $:").pack(side=tk.LEFT, padx=2)
+    widgets["stat_max_trade_val"] = ttk.Entry(filter_frame1, width=10)
+    widgets["stat_max_trade_val"].pack(side=tk.LEFT, padx=2)
+
+    ttk.Label(filter_frame1, text="Max qty:").pack(side=tk.LEFT, padx=2)
+    widgets["stat_max_qty"] = ttk.Entry(filter_frame1, width=10)
+    widgets["stat_max_qty"].pack(side=tk.LEFT, padx=2)
+
+    ttk.Label(filter_frame1, text="DTE: min").pack(side=tk.LEFT, padx=2)
+    widgets["stat_dte_min"] = ttk.Entry(filter_frame1, width=8)
+    widgets["stat_dte_min"].pack(side=tk.LEFT, padx=2)
+
+    ttk.Label(filter_frame1, text="max").pack(side=tk.LEFT, padx=2)
+    widgets["stat_dte_max"] = ttk.Entry(filter_frame1, width=8)
+    widgets["stat_dte_max"].pack(side=tk.LEFT, padx=2)
+
+    # Filter row 2 - Exclude checkboxes
+    filter_frame2 = ttk.Frame(frame)
+    filter_frame2.pack(side=tk.TOP, fill=tk.X, padx=5, pady=2)
+
+    ttk.Label(filter_frame2, text="Exclude: ").pack(side=tk.LEFT, padx=2)
+
+    checkbox_configs = [
+        ("-stat-NegPnL", "Neg PnL", False),
+        ("-stat-PosPnL", "Pos PnL", False),
+        ("-stat-stocks", "Stocks", True),
+        ("-stat-options", "Options", False),
+        ("-stat-bto", "BTO", False),
+        ("-stat-sto", "STO", False),
+    ]
+
+    for key, text, default in checkbox_configs:
+        var = tk.BooleanVar(value=default)
+        widgets[key] = ttk.Checkbutton(filter_frame2, text=text, variable=var)
+        widgets[key].var = var
+        widgets[key].pack(side=tk.LEFT, padx=2)
+
+    ttk.Label(filter_frame2, text="| Authors:").pack(side=tk.LEFT, padx=2)
+    widgets["stat_exc_author"] = ttk.Entry(filter_frame2, width=12)
+    widgets["stat_exc_author"].pack(side=tk.LEFT, padx=2)
+
+    ttk.Label(filter_frame2, text="Symbols:").pack(side=tk.LEFT, padx=2)
+    widgets["stat_exc_sym"] = ttk.Entry(filter_frame2, width=12)
+    widgets["stat_exc_sym"].pack(side=tk.LEFT, padx=2)
+
+    ttk.Label(filter_frame2, text="Channels:").pack(side=tk.LEFT, padx=2)
+    widgets["stat_exc_chn"] = ttk.Entry(filter_frame2, width=12)
+    widgets["stat_exc_chn"].pack(side=tk.LEFT, padx=2)
+
+    # Update button
+    update_frame = ttk.Frame(frame)
+    update_frame.pack(side=tk.TOP, fill=tk.X, padx=5, pady=2)
+
+    widgets["_upd-stat_"] = ttk.Button(update_frame, text="Update", bootstyle="dark")
+    widgets["_upd-stat_"].pack(side=tk.LEFT, padx=2)
+
+    # Info text
+    info_frame = ttk.Frame(frame)
+    info_frame.pack(side=tk.TOP, fill=tk.X, padx=5, pady=2)
+
+    info_text = (
+        "PnL-actual = PnL from prices at the moment of alerted trade (as opposed to the prices claimed in the alert) \n"
+        "diff = difference between actual and alerted, high BTO and low STC diffs is bad, alerts are delayed"
+    )
+    ttk.Label(info_frame, text=info_text, wraplength=800).pack(side=tk.LEFT, padx=2)
+
+    # Table
+    table_frame = ttk.Frame(frame)
+    table_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True, padx=5, pady=5)
+
+    tree_scroll_y = ttk.Scrollbar(table_frame, orient=tk.VERTICAL)
+    tree_scroll_x = ttk.Scrollbar(table_frame, orient=tk.HORIZONTAL)
+
+    widgets["_stat_"] = Treeview(
+        table_frame,
+        columns=data_n_headers[1],
+        show="tree headings",
+        yscrollcommand=tree_scroll_y.set,
+        xscrollcommand=tree_scroll_x.set,
+    )
+
+    tree_scroll_y.config(command=widgets["_stat_"].yview)
+    tree_scroll_x.config(command=widgets["_stat_"].xview)
+
+    tree_scroll_y.pack(side=tk.RIGHT, fill=tk.Y)
+    tree_scroll_x.pack(side=tk.BOTTOM, fill=tk.X)
+    widgets["_stat_"].pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+    # Configure columns
+    widgets["_stat_"].column("#0", width=50, minwidth=50)
+    for idx, heading in enumerate(data_n_headers[1]):
+        widgets["_stat_"].heading(f"#{idx + 1}", text=heading)
+        widgets["_stat_"].column(f"#{idx + 1}", width=100, minwidth=50)
+
+    # Insert data
+    for row_idx, row_data in enumerate(values):
+        tag = "evenrow" if row_idx % 2 == 0 else "oddrow"
+        widgets["_stat_"].insert(
+            "", tk.END, text=str(row_idx + 1), values=row_data, tags=(tag,)
+        )
+
+    widgets["_stat_"].tag_configure("oddrow", background="white")
+    widgets["_stat_"].tag_configure("evenrow", background="lightgray")
+
+    return frame, widgets
+
+
+def create_chan_msg_frame(parent, chn, data_n_headers, font_body, font_header):
+    """Create channel message history display"""
+    frame = ttk.Frame(parent)
+    widgets = {}
+
+    if data_n_headers[0] == []:
+        values = [["" * len(data_n_headers[1])]]
     else:
-        values=data_n_headers[0]
+        values = data_n_headers[0]
 
-    layout = [
-        [sg.Text('Filter:  Authors: '), sg.Input(key=f'{chn}_filt_author'),
-           # sg.Text(' '*2),
-         sg.Text('Date from: ', tooltip=tlp_date), 
-         sg.Input(key=f'{chn}_filt_date_frm', default_text='week', tooltip=tlp_date),
-         sg.Text(' To: ', tooltip=tlp_date), sg.Input(key=f'{chn}_filt_date_to', tooltip=tlp_date),
-          # sg.Text(' '*1),
-         sg.Text('Message contains: '), sg.Input(key=f'{chn}_filt_cont'),
-         ],
-        [sg.ReadFormButton("Update", button_color=('white', 'black'), key=f'{chn}_UPD', bind_return_key=True)],
-        [sg.Column([[sg.Table(values=values,
-                  headings=data_n_headers[1],
-                  justification='left',
-                  display_row_numbers=False,
-                  text_color='black',
-                  font=font_body,
-                  # col_widths=[30,200, 300],
-                  header_font=font_header,
-                  auto_size_columns =True, max_col_width=30,
-                  # auto_size_columns=True,
-                  # vertical_scroll_only=False,
-                   alternating_row_color='grey',
-                  # col_widths=[30,300, 1300],
-                  # row_height=20,
-                  # num_rows=30,
-                  # enable_events = False,
-                  # bind_return_key = True,
-                #   tooltip = "Selecting row and pressing enter will parse message",
-                  key=f"{chn}_table")]])]
-        ]
-    return layout
+    # Filter row
+    filter_frame = ttk.Frame(frame)
+    filter_frame.pack(side=tk.TOP, fill=tk.X, padx=5, pady=2)
+
+    ttk.Label(filter_frame, text="Filter:  Authors:").pack(side=tk.LEFT, padx=2)
+    widgets[f"{chn}_filt_author"] = ttk.Entry(filter_frame, width=15)
+    widgets[f"{chn}_filt_author"].pack(side=tk.LEFT, padx=2)
+
+    ttk.Label(filter_frame, text="Date from:").pack(side=tk.LEFT, padx=2)
+    widgets[f"{chn}_filt_date_frm"] = ttk.Entry(filter_frame, width=10)
+    widgets[f"{chn}_filt_date_frm"].insert(0, "week")
+    widgets[f"{chn}_filt_date_frm"].pack(side=tk.LEFT, padx=2)
+
+    ttk.Label(filter_frame, text="To:").pack(side=tk.LEFT, padx=2)
+    widgets[f"{chn}_filt_date_to"] = ttk.Entry(filter_frame, width=10)
+    widgets[f"{chn}_filt_date_to"].pack(side=tk.LEFT, padx=2)
+
+    ttk.Label(filter_frame, text="Message contains:").pack(side=tk.LEFT, padx=2)
+    widgets[f"{chn}_filt_cont"] = ttk.Entry(filter_frame, width=20)
+    widgets[f"{chn}_filt_cont"].pack(side=tk.LEFT, padx=2)
+
+    # Update button
+    update_frame = ttk.Frame(frame)
+    update_frame.pack(side=tk.TOP, fill=tk.X, padx=5, pady=2)
+
+    widgets[f"{chn}_UPD"] = ttk.Button(update_frame, text="Update", bootstyle="dark")
+    widgets[f"{chn}_UPD"].pack(side=tk.LEFT, padx=2)
+
+    # Table
+    table_frame = ttk.Frame(frame)
+    table_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True, padx=5, pady=5)
+
+    tree_scroll_y = ttk.Scrollbar(table_frame, orient=tk.VERTICAL)
+    tree_scroll_x = ttk.Scrollbar(table_frame, orient=tk.HORIZONTAL)
+
+    widgets[f"{chn}_table"] = Treeview(
+        table_frame,
+        columns=data_n_headers[1],
+        show="headings",
+        yscrollcommand=tree_scroll_y.set,
+        xscrollcommand=tree_scroll_x.set,
+    )
+
+    tree_scroll_y.config(command=widgets[f"{chn}_table"].yview)
+    tree_scroll_x.config(command=widgets[f"{chn}_table"].xview)
+
+    tree_scroll_y.pack(side=tk.RIGHT, fill=tk.Y)
+    tree_scroll_x.pack(side=tk.BOTTOM, fill=tk.X)
+    widgets[f"{chn}_table"].pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+    # Configure columns
+    for idx, heading in enumerate(data_n_headers[1]):
+        widgets[f"{chn}_table"].heading(f"#{idx}", text=heading)
+        widgets[f"{chn}_table"].column(f"#{idx}", width=100, minwidth=50)
+
+    # Insert data
+    for row_data in values:
+        widgets[f"{chn}_table"].insert("", tk.END, values=row_data)
+
+    return frame, widgets
 
 
-def tt_acnt(text, fsize=12, bold=True, underline=True, font_name="Arial", size=None, k=None):
-    font = [font_name, fsize]
-    if bold: font += ['bold']
-    if underline: font += ["underline"]
-    if size is None:
-        size = (len(text) *2, 1)
-    if k is not None:
-        return sg.T(text,font=font,size=size, key=k)
-    else:
-        return sg.T(text,font=font,size=size)
+def create_account_frame(parent, bksession, font_body, font_header):
+    """Create account information display"""
+    frame = ttk.Frame(parent)
+    widgets = {}
 
-
-def layout_account(bksession, font_body, font_header):
     if bksession is None:
-        return [[sg.T("No brokerage API provided in config.ini")]]
+        label = ttk.Label(frame, text="No brokerage API provided in config.ini")
+        label.pack(padx=20, pady=20)
+        return frame, widgets
+
     acc_inf, ainf = gg.get_acc_bals(bksession)
     pos_tab, pos_headings = gg.get_pos(acc_inf)
     if not len(pos_tab):
-        pos_tab = ["No post"]
-    ord_tab, ord_headings, _= gg.get_orders(acc_inf)
+        pos_tab = [["No positions"]]
+    ord_tab, ord_headings, _ = gg.get_orders(acc_inf)
 
-    layout = [[sg.Column([
-        [tt_acnt("Account ID:", font_body[1]), tt_acnt(ainf["id"], font_body[1], 0, 0, font_body[0]),
-         tt_acnt("Balance:", font_body[1]), tt_acnt("$" + str(ainf["balance"]), font_body[1], 0, 0, font_body[0], k="acc_b"),
-         tt_acnt("Cash:", font_body[1]), tt_acnt("$" + str(ainf["cash"]), font_body[1], 0, 0, font_body[0], k="acc_c"),
-         tt_acnt("Funds:", font_body[1]), tt_acnt("$" + str(ainf["funds"]), font_body[1], 0, 0, font_body[0], k="acc_f")
-         ],[sg.ReadFormButton("Update", button_color=('white', 'black'), key='acc_updt', bind_return_key=True)]
-             ])],
-        [sg.Column(
-            [
-             [sg.T("Positions", font=(font_body[0], font_body[1], 'bold', "underline"),size=(20,1.5))],
-             [sg.Table(values=pos_tab, headings=pos_headings,justification='left',
-              display_row_numbers=False, text_color='black', font=font_body,
-               auto_size_columns=True,
-               header_font=font_header,
-              alternating_row_color='grey',
-               max_col_width=30,
-              key='_positions_')]]),
-        sg.Column(
-            [
-             [sg.T("Orders",font=(font_header[0], font_header[1], 'bold', "underline"),size=(20,1.5))],
-             [sg.Table(values=ord_tab, headings=ord_headings,justification='left',
-              display_row_numbers=False, text_color='black', font=font_body,
-              auto_size_columns=True, 
-              header_font=font_header,
-              key='_orders_')]])
-            ]]
-    return layout
+    # Account info row
+    info_frame = ttk.Frame(frame)
+    info_frame.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
+
+    ttk.Label(
+        info_frame, text="Account ID:", font=(font_body[0], font_body[1], "bold")
+    ).pack(side=tk.LEFT, padx=5)
+    ttk.Label(info_frame, text=ainf["id"]).pack(side=tk.LEFT, padx=5)
+
+    ttk.Label(
+        info_frame, text="Balance:", font=(font_body[0], font_body[1], "bold")
+    ).pack(side=tk.LEFT, padx=5)
+    widgets["acc_b"] = ttk.Label(info_frame, text="$" + str(ainf["balance"]))
+    widgets["acc_b"].pack(side=tk.LEFT, padx=5)
+
+    ttk.Label(info_frame, text="Cash:", font=(font_body[0], font_body[1], "bold")).pack(
+        side=tk.LEFT, padx=5
+    )
+    widgets["acc_c"] = ttk.Label(info_frame, text="$" + str(ainf["cash"]))
+    widgets["acc_c"].pack(side=tk.LEFT, padx=5)
+
+    ttk.Label(
+        info_frame, text="Funds:", font=(font_body[0], font_body[1], "bold")
+    ).pack(side=tk.LEFT, padx=5)
+    widgets["acc_f"] = ttk.Label(info_frame, text="$" + str(ainf["funds"]))
+    widgets["acc_f"].pack(side=tk.LEFT, padx=5)
+
+    # Update button
+    update_frame = ttk.Frame(frame)
+    update_frame.pack(side=tk.TOP, fill=tk.X, padx=5, pady=2)
+
+    widgets["acc_updt"] = ttk.Button(update_frame, text="Update", bootstyle="dark")
+    widgets["acc_updt"].pack(side=tk.LEFT, padx=2)
+
+    # Tables container
+    tables_frame = ttk.Frame(frame)
+    tables_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True, padx=5, pady=5)
+
+    # Positions frame
+    pos_frame = ttk.Frame(tables_frame)
+    pos_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=2)
+
+    ttk.Label(
+        pos_frame,
+        text="Positions",
+        font=(font_body[0], font_body[1], "bold", "underline"),
+    ).pack(side=tk.TOP, pady=5)
+
+    pos_scroll_y = ttk.Scrollbar(pos_frame, orient=tk.VERTICAL)
+    pos_scroll_x = ttk.Scrollbar(pos_frame, orient=tk.HORIZONTAL)
+
+    widgets["_positions_"] = Treeview(
+        pos_frame,
+        columns=pos_headings,
+        show="headings",
+        yscrollcommand=pos_scroll_y.set,
+        xscrollcommand=pos_scroll_x.set,
+    )
+
+    pos_scroll_y.config(command=widgets["_positions_"].yview)
+    pos_scroll_x.config(command=widgets["_positions_"].xview)
+
+    pos_scroll_y.pack(side=tk.RIGHT, fill=tk.Y)
+    pos_scroll_x.pack(side=tk.BOTTOM, fill=tk.X)
+    widgets["_positions_"].pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+    for idx, heading in enumerate(pos_headings):
+        widgets["_positions_"].heading(f"#{idx}", text=heading)
+        widgets["_positions_"].column(f"#{idx}", width=100)
+
+    for row_data in pos_tab:
+        widgets["_positions_"].insert("", tk.END, values=row_data)
+
+    # Orders frame
+    ord_frame = ttk.Frame(tables_frame)
+    ord_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=2)
+
+    ttk.Label(
+        ord_frame,
+        text="Orders",
+        font=(font_header[0], font_header[1], "bold", "underline"),
+    ).pack(side=tk.TOP, pady=5)
+
+    ord_scroll_y = ttk.Scrollbar(ord_frame, orient=tk.VERTICAL)
+    ord_scroll_x = ttk.Scrollbar(ord_frame, orient=tk.HORIZONTAL)
+
+    widgets["_orders_"] = Treeview(
+        ord_frame,
+        columns=ord_headings,
+        show="headings",
+        yscrollcommand=ord_scroll_y.set,
+        xscrollcommand=ord_scroll_x.set,
+    )
+
+    ord_scroll_y.config(command=widgets["_orders_"].yview)
+    ord_scroll_x.config(command=widgets["_orders_"].xview)
+
+    ord_scroll_y.pack(side=tk.RIGHT, fill=tk.Y)
+    ord_scroll_x.pack(side=tk.BOTTOM, fill=tk.X)
+    widgets["_orders_"].pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+    for idx, heading in enumerate(ord_headings):
+        widgets["_orders_"].heading(f"#{idx}", text=heading)
+        widgets["_orders_"].column(f"#{idx}", width=100)
+
+    for row_data in ord_tab:
+        widgets["_orders_"].insert("", tk.END, values=row_data)
+
+    return frame, widgets
+
+
+def update_acct_frame(bksession, widgets):
+    """Update account information"""
+    acc_inf, ainf = gg.get_acc_bals(bksession)
+    pos_tab, _ = gg.get_pos(acc_inf)
+    ord_tab, _, _ = gg.get_orders(acc_inf)
+
+    widgets["acc_b"].config(text="$" + str(ainf["balance"]))
+    widgets["acc_c"].config(text="$" + str(ainf["cash"]))
+    widgets["acc_f"].config(text="$" + str(ainf["funds"]))
+
+    # Update positions table
+    widgets["_positions_"].delete(*widgets["_positions_"].get_children())
+    for row_data in pos_tab:
+        widgets["_positions_"].insert("", tk.END, values=row_data)
+
+    # Update orders table
+    widgets["_orders_"].delete(*widgets["_orders_"].get_children())
+    for row_data in ord_tab:
+        widgets["_orders_"].insert("", tk.END, values=row_data)
+
+
+def create_config_frame(parent, fnt_h, cfg):
+    """Create configuration panel - simplified version"""
+    frame = ttk.Frame(parent)
+    widgets = {}
+
+    # Create scrollable canvas
+    canvas = tk.Canvas(frame, highlightthickness=0)
+    scrollbar = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=canvas.yview)
+    scrollable_frame = ttk.Frame(canvas)
+
+    scrollable_frame.bind(
+        "<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+    )
+
+    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    # Title
+    title_label = ttk.Label(
+        scrollable_frame,
+        text="Session Configuration (change config.ini for permanent changes)",
+        font=(fnt_h, 12, "bold"),
+    )
+    title_label.grid(row=0, column=0, columnspan=2, pady=10, sticky="w")
+
+    row = 1
+
+    # General section
+    ttk.Label(scrollable_frame, text="General Settings", font=(fnt_h, 10, "bold")).grid(
+        row=row, column=0, sticky="w", padx=10, pady=5
+    )
+    row += 1
+
+    var = tk.BooleanVar(value=cfg["discord"].getboolean("notify_alerts_to_discord"))
+    widgets["cfg_discord.notify_alerts_to_discord"] = ttk.Checkbutton(
+        scrollable_frame, text="Notify alerts to discord", variable=var
+    )
+    widgets["cfg_discord.notify_alerts_to_discord"].var = var
+    widgets["cfg_discord.notify_alerts_to_discord"].grid(
+        row=row, column=0, sticky="w", padx=20, pady=2
+    )
+    row += 1
+
+    ttk.Label(scrollable_frame, text="Off market hours:").grid(
+        row=row, column=0, sticky="w", padx=20, pady=2
+    )
+    widgets["cfg_general.off_hours"] = ttk.Entry(scrollable_frame, width=40)
+    widgets["cfg_general.off_hours"].insert(0, cfg["general"]["off_hours"])
+    widgets["cfg_general.off_hours"].grid(row=row, column=1, sticky="w", pady=2)
+    row += 1
+
+    # Long Trading section
+    ttk.Separator(scrollable_frame, orient="horizontal").grid(
+        row=row, column=0, columnspan=2, sticky="ew", pady=10
+    )
+    row += 1
+    ttk.Label(scrollable_frame, text="Long Trading", font=(fnt_h, 10, "bold")).grid(
+        row=row, column=0, sticky="w", padx=10, pady=5
+    )
+    row += 1
+
+    # Add key configuration items (simplified for brevity)
+    config_items = [
+        (
+            "cfg_general.do_BTO_trades",
+            "Do BTO trades",
+            "checkbox",
+            cfg["general"].getboolean("Do_BTO_trades"),
+        ),
+        (
+            "cfg_general.do_STC_trades",
+            "Do STC trades",
+            "checkbox",
+            cfg["general"].getboolean("Do_STC_trades"),
+        ),
+        (
+            "cfg_discord.authors_subscribed",
+            "Authors subscribed:",
+            "entry",
+            cfg["discord"]["authors_subscribed"],
+        ),
+        (
+            "cfg_order_configs.max_price_diff",
+            "Max price diff:",
+            "entry",
+            cfg["order_configs"]["max_price_diff"],
+        ),
+        (
+            "cfg_order_configs.trade_capital",
+            "Trade capital ($):",
+            "entry",
+            cfg["order_configs"]["trade_capital"],
+        ),
+    ]
+
+    for key, label, widget_type, default in config_items:
+        if widget_type == "checkbox":
+            var = tk.BooleanVar(value=default)
+            widgets[key] = ttk.Checkbutton(scrollable_frame, text=label, variable=var)
+            widgets[key].var = var
+            widgets[key].grid(
+                row=row, column=0, columnspan=2, sticky="w", padx=20, pady=2
+            )
+        else:
+            ttk.Label(scrollable_frame, text=label).grid(
+                row=row, column=0, sticky="w", padx=20, pady=2
+            )
+            widgets[key] = ttk.Entry(scrollable_frame, width=40)
+            widgets[key].insert(0, default)
+            widgets[key].grid(row=row, column=1, sticky="w", pady=2)
+        row += 1
+
+    # Save button
+    ttk.Separator(scrollable_frame, orient="horizontal").grid(
+        row=row, column=0, columnspan=2, sticky="ew", pady=10
+    )
+    row += 1
+    widgets["cfg_button"] = ttk.Button(
+        scrollable_frame, text="Save Configuration", bootstyle="success"
+    )
+    widgets["cfg_button"].grid(row=row, column=0, columnspan=2, pady=10)
+
+    canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+    return frame, widgets
+
+
+# Legacy compatibility functions
+def layout_console(
+    ttl="Discord messages from subscribed channels", key="-MLINE-__WRITE ONLY__"
+):
+    """Legacy wrapper for create_console_frame"""
+    return None, key
+
+
+def trigger_alerts_layout():
+    """Legacy wrapper - returns empty layout, actual implementation uses create_trigger_alerts_frame"""
+    return []
+
+
+def layout_portfolio(data_n_headers, font_body, font_header):
+    """Legacy wrapper - returns empty layout"""
+    return []
+
+
+def layout_traders(data_n_headers, font_body, font_header):
+    """Legacy wrapper - returns empty layout"""
+    return []
+
+
+def layout_stats(data_n_headers, font_body, font_header):
+    """Legacy wrapper - returns empty layout"""
+    return []
+
+
+def layout_chan_msg(chn, data_n_headers, font_body, font_header):
+    """Legacy wrapper - returns empty layout"""
+    return []
+
+
+def layout_account(bksession, font_body, font_header):
+    """Legacy wrapper - returns empty layout"""
+    return [[]]
 
 
 def update_acct_ly(bksession, window):
-
-    acc_inf, ainf = gg.get_acc_bals(bksession)
-    pos_tab, _ = gg.get_pos(acc_inf)
-    ord_tab, _, _= gg.get_orders(acc_inf)
-
-    window.Element("acc_b").update(ainf["balance"])
-    window.Element("acc_c").update(ainf["cash"])
-    window.Element("acc_f").update(ainf["funds"])
-
-    window.Element("_positions_").update(pos_tab)
-    window.Element("_orders_").update(ord_tab)
-    
-    for el in ["_positions_", "_orders_"]:
-        window.Element(el).Widget.resizeRowsToContents()
-        window.Element(el).Widget.resizeColumnsToContents()
+    """Legacy wrapper for updating account - no-op for now"""
+    pass
 
 
 def layout_config(fnt_h, cfg):
-    
-    frame1 =[[sg.Checkbox("Notify alerts to discord", default=cfg['discord'].getboolean('notify_alerts_to_discord'),
-                        key="cfg_discord.notify_alerts_to_discord", text_color='black',
-                        tooltip='Option to send an your trade alerts to a channel using webhook specified in config.ini')],
-            [sg.Text("off market hours:"), 
-                sg.Input(cfg['general']['off_hours'],key="cfg_general.off_hours", 
-                    tooltip='set your local hours where market is closed, e.g. 16,9 means from 4pm to 9am [eastern time],\nused for sampling quotes and shorting'),
-                sg.Stretch()],
-
-            ]
-        
-    frame2 = [
-        [sg.Checkbox('Do BTO trades', cfg['general'].getboolean('Do_BTO_trades'), text_color='black',
-                    key="cfg_general.do_BTO_trades", tooltip='Accept Buy alerts and open trades', enable_events=True)],
-        [sg.Checkbox('Do STC trades', cfg['general'].getboolean('Do_STC_trades'), text_color='black',
-                    key="cfg_general.do_STC_trades", tooltip='Accept Sell alerts and close trade', enable_events=True)],
-        [sg.Checkbox('Trade @ current price', cfg['order_configs'].getboolean('sell_current_price'), text_color='black',
-                    key="cfg_order_configs.sell_current_price", 
-                    tooltip='When BTO alerts, sell current rather than alerted,\nif alerted is too low it will not fill if false', enable_events=True)],
-        [sg.Checkbox('Accept repeated BTO alerts', cfg['order_configs'].getboolean('accept_repeated_bto_alerts'), text_color='black',
-                    key="cfg_order_configs.accept_repeated_bto_alerts", tooltip='With repeated BTO, it will average down', enable_events=True)],
-
-        [sg.Text("Authors subscribed:",
-                tooltip='list of authors to follow, e.g. me_long,trader#1234'), 
-        sg.Input(cfg['discord']['authors_subscribed'],key="cfg_discord.authors_subscribed",
-                tooltip='list of authors to follow, e.g. me_long,trader#1234', enable_events=True)],
-        [sg.Text("Channelwise subscription:",
-                tooltip='Specify a channel to follow allerts from ALL the authors, useful for challenge accounts'), 
-        sg.Input(cfg['discord']['channelwise_subscription'], key="cfg_discord.channelwise_subscription",
-                tooltip='Specify a channel to follow allerts from ALL the authors, useful for challenge accounts', enable_events=True)],
-        [sg.Text("Authorwise subscription:",
-                tooltip='The app will capture messages for this user, add it to authors substribed for following the alerts'), 
-        sg.Input(cfg['discord']['authorwise_subscription'], key="cfg_discord.authorwise_subscription", enable_events=True,
-                tooltip='The app will capture messages for this user, add it to authors substribed for following the alerts')],
-        [sg.Text("Max price diff:",
-                tooltip='For stocks and options max value diff to accept current price,\nif not will lim to alerted price'), 
-        sg.Input(cfg['order_configs']['max_price_diff'],key="cfg_order_configs.max_price_diff", enable_events=True,
-                tooltip='For stocks and options max value diff to accept current price,\nif not will lim to alerted price')],
-        [sg.Text("Kill BTO after x seconds:",
-                tooltip='If BTO alert is not filled in this time, it will cancel the order. Leave 0 or empty for None'), 
-        sg.Input(cfg['order_configs']['kill_if_nofill'],key="cfg_order_configs.kill_if_nofill",
-                tooltip='If BTO alert is not filled in this time, it will cancel the order', enable_events=True)],
-        [sg.Text("Default exits (in quotes if not a number, eg. '20%', '50%TS20%'):",
-                tooltip='If not None, it will set up profit taking and stoploss if exit not provided in alert.\n' +\
-                'percentage "30%", for PT can be "%" and a Trailing stop: "30%TS5%". For webull pass "30%TS0%"\n' +\
-                'SL (stop loss) can be percentage: "30%" or trailing stop "TS30%"\n' +\
-                'add quotes to the exits values e.g. "10%"')], 
-        [sg.Input(cfg['order_configs']['default_exits'], key="cfg_order_configs.default_exits",
-                tooltip='If not None, it will set up profit taking (up to 3) and stoploss if exit not provided in alert.\n' +\
-                ' can be $ value: 1.1, percentage: "30%", for PT can be "%" and a Trailing stop: "30%TS5%"\n' +\
-                'SL (stop loss) can be percentage: "30%" or trailing stop "TS30%"\n' +\
-                'add quotes to the exits values e.g. "10%"', enable_events=True,)],
-        [sg.Text("Exclude tickers [SPX should be SPXW]:",
-                 tooltip="will not trade them, [comma separated]"),
-        sg.Input(cfg['order_configs']['exclude_tickers'], key="cfg_order_configs.exclude_tickers",
-                 tooltip="will not trade them, [comma separated]", enable_events=True)],        
-        [sg.Text("Default quantity:",
-                tooltip='If no quantity specified in the alert either "buy_one" or use "trade_capital"'), 
-        sg.Drop(values=['{"default": "buy_one"}', '{"default": "trade_capital"}'] ,default_value=cfg['order_configs']['default_bto_qty'],
-                key="cfg_order_configs.default_bto_qty",
-                tooltip='if no quantity specified in the alert either "buy_one" or use "trade_capital"'),
-        sg.Stretch()],
-        [sg.Text("Trade capital: $",
-                tooltip='if default qty == trade_capital, specify the $ amount per trade, qty will be price/capital'), 
-        sg.Input(cfg['order_configs']['trade_capital'], key="cfg_order_configs.trade_capital", enable_events=True,
-                tooltip='if default qty == trade_capital, specify the $ amount per trade, qty will be price/capital'),
-        sg.Stretch()],
-        [sg.Text("Max capital per trade: $",
-                tooltip='Max investment per trade, if alert qty is higher than this, it will only buy max_trade_capital/price'), 
-        sg.Input(cfg['order_configs']['max_trade_capital'], key="cfg_order_configs.max_trade_capital", enable_events=True,
-                tooltip='Max investment per trade, if alert qty is higher than this, it will only buy max_trade_capital/price'),
-        sg.Stretch()],
-        [sg.Text("Min acceptable option price : $",
-                tooltip='Min investment per trade, if alert qty is lower than this, it will not buy'), 
-        sg.Input(cfg['order_configs']['min_opt_price'], key="cfg_order_configs.min_opt_price", enable_events=True,
-                tooltip='Min investment per trade, if alert qty is lower than this, it will not buy'),
-        sg.Stretch()],
-        ]
-    
-    frame3 = [
-    [sg.Checkbox('Do STO trades, sell to open', cfg['shorting'].getboolean('DO_STO_TRADES'), text_color='black',enable_events=True,
-                key="cfg_shorting.DO_STO_TRADES", tooltip='Accept Shorting Trades, \b bypassed if user manually triggers alert')],
-    
-    [sg.Checkbox("Do BTO trades (buy to open, close trade)", cfg['shorting'].getboolean('DO_BTC_TRADES'), 
-                 enable_events=True, key="cfg_shorting.DO_BTC_TRADES",text_color='black',
-                tooltip='If True, a close alert with BTO\b bypassed if user manually triggers alert')], 
-         
-    [sg.Checkbox("BTC at end of day (EOD)", default=cfg['shorting'].getboolean('BTC_EOD'), key="cfg_shorting.BTC_EOD",text_color='black',
-                tooltip="Close at end of day, if not overnight there might be big losses", enable_events=True), sg.Stretch()],
-    
-    [sg.Checkbox("Accept repeated STO", default=cfg['shorting'].getboolean('accept_repeated_sto_alerts'), key="cfg_shorting.accept_repeated_sto_alerts",text_color='black',
-                tooltip="Trade repeated trades", enable_events=True), sg.Stretch()],
-    
-    [sg.Checkbox("Ignore qty in STO alerts", default=cfg['shorting'].getboolean('ignore_alert_qty'), key="cfg_shorting.ignore_alert_qty",text_color='black',
-                tooltip="Ignore qty in STO alerts", enable_events=True), sg.Stretch()],
-
-    [sg.Text("STO price:",
-                tooltip='Use price: bid, ask, last or alert'), 
-        sg.Drop(values=['bid', 'ask', 'mid', 'last', 'alert'], default_value=cfg['shorting']['STO_price'],
-                key="cfg_shorting.STO_price",enable_events=True,
-                tooltip='Use price: bid, ask, last or alert'),
-        sg.Stretch()],
-
-    [sg.Text('Max price diff', 
-             tooltip='Max difference allowed between alerted price and current price, if not will lim to alerted price'),
-    sg.Input(cfg['shorting']['max_price_diff'], key="cfg_shorting.max_price_diff",  enable_events=True,
-            tooltip='Max difference allowed between alerted price and current price, if not will lim to alerted price'), sg.Stretch()],
-
-    [sg.Text("STO Tailing Stop: %",
-            tooltip="Trail the price until it drops a %, can be empty so no trailing stop"),
-    sg.Input(cfg['shorting']['STO_trailingstop'], key="cfg_shorting.STO_trailingstop", enable_events=True,
-            tooltip="Trail the price until it drops a %, can be empty so no trailing stop"), sg.Stretch()],
-
-    [sg.Text("BTC PT (profit target) %", tooltip="The percentage to trigger BTC at a profit, can be empty so no PT"),
-    sg.Input(cfg['shorting']['BTC_PT'], key="cfg_shorting.BTC_PT",  enable_events=True,
-             tooltip="The percentage to trigger BTC at a profit, can be empty so no PT"), sg.Stretch()],
-
-    [sg.Text("BTC SL (stop loss) %", tooltip="The percentage to trigger BTC at a profit, can be empty so no PT"),
-    sg.Input(cfg['shorting']['BTC_SL'], key="cfg_shorting.BTC_SL",  enable_events=True,
-             tooltip="The percentage to trigger BTC at a stoploss, can be empty so no SL"), sg.Stretch()],
-
-    [sg.Text("EOD PT and SL %", 
-            tooltip="Before close, at 3:45 narrow the SL to 5% and PT to 10% of current price, can be empty"),
-    sg.Input(cfg['shorting']['BTC_EOD_PT_SL'], key="cfg_shorting.BTC_EOD_PT_SL", enable_events=True,
-            tooltip="Before close, at 3:45 narrow the SL to 5% and PT to 10% of current price, can be empty"), sg.Stretch()],
-
-    [sg.Text("Qty based on", tooltip="Either 'buy_one' or use 'margin_capital' to calculate quantity"),
-    sg.Drop(values=['buy_one', 'margin_capital'], default_value=cfg['shorting']['default_sto_qty'], key="cfg_shorting.default_sto_qty",
-            tooltip=" Either 'buy_one' or use 'margin_capital' to calculate quantity", size=(30,1), enable_events=True), sg.Stretch()],
-
-    [sg.Text("margin capital $",
-            tooltip="Specify the $ margin amount per trade, margin = underlying x 20"),
-    sg.Input(cfg['shorting']['margin_capital'], key="cfg_shorting.margin_capital", enable_events=True,
-            tooltip=" Either 'buy_one' or use 'margin_capital' to calculate quantity"), sg.Stretch()],
-
-    [sg.Text("Max days to expiration", 
-            tooltip="0 means expiring same day (more volatile and theta decay), 1 means next day, etc"),
-    sg.Input(cfg['shorting']['max_dte'], key="cfg_shorting.max_dte", enable_events=True,
-            tooltip="0 means expiring same day (more volatile and theta decay), 1 means next day, etc"), sg.Stretch()],
-
-    [sg.Text("Max underlying value", 
-             tooltip= "Max value of the underlying, margin is usually 100 * strike * 0.20, so SPX 4400 requires about $8k maring"),
-    sg.Input(cfg['shorting']['max_strike'], key="cfg_shorting.max_strike", enable_events=True,
-             tooltip= "Max value of the underlying, margin is usually 100 * strike * 0.20, so SPX 4400 requires about $8k maring"), sg.Stretch()],
-    
-    [sg.Text("Min price contract", tooltip="Min price contract, an option at 0.5 price is $50"),
-    sg.Input(cfg['shorting']['min_price'], key="cfg_shorting.min_price",  enable_events=True,
-            tooltip="Min price contract, an option at 0.5 price is $50"), sg.Stretch()],
-
-    [sg.Text("Minimum $ per trade", tooltip="If the quantity is higher than this, it will only buy the min_trade_capital. If one contract is higher than this, it will not buy"),
-    sg.Input(cfg['shorting']['min_trade_capital'], key="cfg_shorting.min_trade_capital", enable_events=True,
-            tooltip="If the quantity is higher than this, it will only buy the min_trade_capital. If one contract is higher than this, it will not buy"), sg.Stretch()],
-
-    [sg.Text("Maximum $ per trade", tooltip="If the quantity is less than this, it will not trade"),
-    sg.Input(cfg['shorting']['max_trade_capital'], key="cfg_shorting.max_trade_capital", enable_events=True,
-            tooltip="If the quantity is less than this, it will not trade"), sg.Stretch()],
-
-    [sg.Text("Authors subscribed:", tooltip="Traders to short, do not put the same names as in [order_configs (long)]. Me_short for GUI alert trigger")],
-    [sg.Input(cfg['shorting']['authors_subscribed'], key="cfg_shorting.authors_subscribed",  enable_events=True,
-            tooltip="Traders to short, do not put the same names as in [order_configs (long)]. Me_short for GUI alert trigger")],
-    ]
-    lay = [[sg.Text("Session Configuration (change config.ini for permanent changes)", font=(fnt_h+ ' bold'), text_color='black', justification='center')],
-        [sg.Frame('General', frame1, title_color='lightred', tooltip='General configurations')],
-        [sg.Frame('Long Trading', frame2, title_color='lightred', tooltip='Config for long trading'), 
-        sg.Frame('Short Trading', frame3, title_color='lightred', tooltip='Config for short trading')],
-        [sg.ReadButton("Save", button_color=('white', 'black'),  bind_return_key=True, key="cfg_button")]
-        ]
-    
-    return lay
-
-
-
+    """Legacy wrapper - returns empty layout"""
+    return []
